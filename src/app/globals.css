@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #07080b;
+  color: #e8edf5;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 8% -20%, rgba(245, 165, 36, 0.18), transparent 36%),
+    radial-gradient(circle at 92% 8%, rgba(56, 189, 248, 0.08), transparent 26%),
+    linear-gradient(180deg, #0c0f14 0%, #07080b 48%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+}
+
+.panel {
+  @apply rounded-2xl border border-white/[0.06] bg-[#10131a]/85 shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_20px_60px_rgba(0,0,0,0.25)];
+  backdrop-filter: blur(10px);
+}
+
+.chip {
+  @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-[0.14em];
+}
+
+.diff-add {
+  background: rgba(52, 211, 153, 0.12);
+  color: #bbf7d0;
+}
+
+.diff-del {
+  background: rgba(251, 113, 133, 0.12);
+  color: #fecdd3;
+}
+
+.grid-fade {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent 80%);
+}

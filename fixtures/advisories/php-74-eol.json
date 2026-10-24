@@ -1,0 +1,24 @@
+{
+  "id": "php-74-eol",
+  "title": "PHP 7.4 is end-of-life and no longer receives security patches",
+  "kind": "runtime_platform",
+  "severity": "critical",
+  "severitySource": "PHP supported versions policy / Harbor SEC-PHP-01",
+  "summary": "PHP 7.4 reached official end of life on 28 November 2022. Any application still executing on 7.4 is running an unsupported runtime. A source-code edit cannot patch the interpreter.",
+  "component": "php",
+  "ecosystem": "php",
+  "affectedRange": ">=7.4 <8.0",
+  "fixedVersions": ["8.2.26", "8.3.14", "8.4.1"],
+  "recommendedAction": "runtime_upgrade",
+  "remediation": "Upgrade the runtime, Composer platform pin, and CI PHP version to a currently supported release (8.2 or 8.3 for this demo). Keep application source unchanged unless a compatibility check fails.",
+  "references": [
+    {
+      "label": "PHP supported versions",
+      "url": "https://www.php.net/supported-versions.php"
+    },
+    {
+      "label": "PHP 7.4 EOL",
+      "url": "https://www.php.net/eol.php"
+    }
+  ]
+}

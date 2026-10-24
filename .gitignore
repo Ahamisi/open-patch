@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+dist
+coverage
+data/*.json
+!data/.gitkeep
+.env
+.DS_Store
+*.log
+tsconfig.tsbuildinfo
+next-env.d.ts

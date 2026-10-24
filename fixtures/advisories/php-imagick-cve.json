@@ -1,0 +1,19 @@
+{
+  "id": "php-imagick-cve",
+  "title": "Imagick PHP extension heap overflow in versions before 3.7.0",
+  "kind": "dependency",
+  "severity": "high",
+  "severitySource": "Seeded advisory (demo)",
+  "summary": "A heap overflow was reported in the Imagick PHP extension before 3.7.0 when processing crafted images. Applications that do not load ext-imagick are outside the affected component.",
+  "component": "ext-imagick",
+  "affectedRange": "<3.7.0",
+  "fixedVersions": ["3.7.0"],
+  "recommendedAction": "dependency_upgrade",
+  "remediation": "If Imagick is present, upgrade ext-imagick to 3.7.0 or later. If the extension is not installed or required, no change is needed.",
+  "references": [
+    {
+      "label": "PECL imagick",
+      "url": "https://pecl.php.net/package/imagick"
+    }
+  ]
+}

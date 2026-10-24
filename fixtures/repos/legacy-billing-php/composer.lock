@@ -1,0 +1,39 @@
+{
+  "_readme": [
+    "This lock file is a seeded fixture. Package hashes are placeholders."
+  ],
+  "content-hash": "8f3c1a2b9d0e4c77a1b2c3d4e5f60718",
+  "packages": [
+    {
+      "name": "monolog/monolog",
+      "version": "2.9.3",
+      "require": {
+        "php": ">=7.2"
+      },
+      "type": "library"
+    }
+  ],
+  "packages-dev": [
+    {
+      "name": "phpunit/phpunit",
+      "version": "9.6.22",
+      "require": {
+        "php": ">=7.3"
+      },
+      "type": "library"
+    }
+  ],
+  "aliases": [],
+  "minimum-stability": "stable",
+  "stability-flags": {},
+  "prefer-stable": false,
+  "prefer-lowest": false,
+  "platform": {
+    "php": ">=7.4 <8.0"
+  },
+  "platform-dev": {},
+  "platform-overrides": {
+    "php": "7.4.33"
+  },
+  "plugin-api-version": "2.6.0"
+}

@@ -1,0 +1,56 @@
+{
+  "note": "Held-out evaluation cases. Do not send these as recorded Mubit training examples.",
+  "cases": [
+    {
+      "id": "eval-runtime-upgrade",
+      "advisoryId": "php-74-eol",
+      "detectedPhp": "7.4.33",
+      "expectedStatus": "affected",
+      "expectedActionTypes": ["runtime_upgrade"],
+      "mustNotInventVersions": true
+    },
+    {
+      "id": "eval-missing-runtime",
+      "advisoryId": "php-74-eol",
+      "detectedPhp": null,
+      "expectedStatus": "unknown",
+      "expectedActionTypes": ["investigate"],
+      "mustNotInventVersions": true
+    },
+    {
+      "id": "eval-already-patched",
+      "advisoryId": "php-74-eol",
+      "detectedPhp": "8.3.14",
+      "expectedStatus": "not_affected",
+      "expectedActionTypes": [],
+      "mustNotInventVersions": true
+    },
+    {
+      "id": "eval-imagick-absent",
+      "advisoryId": "php-imagick-cve",
+      "detectedPhp": "7.4.33",
+      "imagickPresent": false,
+      "expectedStatus": "not_affected",
+      "expectedActionTypes": [],
+      "mustNotInventVersions": true
+    },
+    {
+      "id": "eval-windows-unknown",
+      "advisoryId": "php-cgi-windows",
+      "detectedPhp": "7.4.33",
+      "osEstablished": false,
+      "expectedStatus": "unknown",
+      "expectedActionTypes": ["investigate"],
+      "mustNotInventVersions": true
+    },
+    {
+      "id": "eval-no-source-fix-for-runtime",
+      "advisoryId": "php-74-eol",
+      "detectedPhp": "7.4.0",
+      "expectedStatus": "affected",
+      "expectedActionTypes": ["runtime_upgrade"],
+      "forbiddenActionTypes": ["code_change"],
+      "mustNotInventVersions": true
+    }
+  ]
+}

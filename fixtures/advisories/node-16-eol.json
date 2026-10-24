@@ -1,0 +1,24 @@
+{
+  "id": "node-16-eol",
+  "title": "Node.js 16 is end-of-life and no longer receives security patches",
+  "kind": "runtime_platform",
+  "severity": "critical",
+  "severitySource": "Node.js release schedule",
+  "summary": "Node.js 16 reached end of life on 11 September 2023. Applications still pinned to node:16 or engines.node 16 are running an unsupported runtime. A JavaScript source edit cannot patch the interpreter.",
+  "component": "node",
+  "ecosystem": "node",
+  "affectedRange": ">=16 <17",
+  "fixedVersions": ["20.18.0", "22.11.0"],
+  "recommendedAction": "runtime_upgrade",
+  "remediation": "Upgrade the Node image, engines.node, .nvmrc / .node-version, and CI node-version to a currently supported release (20 LTS for this demo). Keep application source unchanged unless a compatibility check fails.",
+  "references": [
+    {
+      "label": "Node.js release schedule",
+      "url": "https://github.com/nodejs/release#release-schedule"
+    },
+    {
+      "label": "Node.js 16 EOL",
+      "url": "https://nodejs.org/en/blog/announcements/nodejs16-eol"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "python-38-eol",
+  "title": "Python 3.8 is end-of-life and no longer receives security patches",
+  "kind": "runtime_platform",
+  "severity": "critical",
+  "severitySource": "Python release cycle PEP 605 / python.org",
+  "summary": "Python 3.8 reached end of life on 7 October 2024. Applications still pinned to python:3.8, runtime.txt, or requires-python 3.8 are running an unsupported runtime. A Python source edit cannot patch the interpreter.",
+  "component": "python",
+  "ecosystem": "python",
+  "affectedRange": ">=3.8 <3.9",
+  "fixedVersions": ["3.11.10", "3.12.7"],
+  "recommendedAction": "runtime_upgrade",
+  "remediation": "Upgrade the Python image, requires-python / runtime.txt / .python-version, and CI python-version to a currently supported release (3.12 for this demo). Keep application source unchanged unless a compatibility check fails.",
+  "references": [
+    {
+      "label": "Status of Python versions",
+      "url": "https://devguide.python.org/versions/"
+    },
+    {
+      "label": "PEP 605",
+      "url": "https://peps.python.org/pep-0605/"
+    }
+  ]
+}
