@@ -17,6 +17,7 @@ credentials.json
 
 # runtime data
 data/*.json
+data/*.jsonl
 !data/.gitkeep
 
 # junk
