@@ -83,7 +83,47 @@ Flip to 8.3 = one field in the user message. Not a new model.
 
 ---
 
-## Slide 6 — What a pin is
+## Slide 6 — Use cases
+
+**Review. Migrate. Patch. Against the rules you already wrote.**
+
+**Code review** — Stop arguing 8.4 in every PR. The reviewer already said house line is 8.2. That note is the next plan.
+
+**Migration** — Eighty repos. One advisory. PHP this week. Node 16 and Python 3.8 already ship. Repo 80 is cheaper than repo 1.
+
+**Patching** — Move the locks. Leave the app. Missing files skipped. Unsure stays. Human merges. No auto-deploy.
+
+---
+
+## Slide 7 — How you tap in
+
+**Bring the policy you already have.**
+
+1. Attach SEC-RUNTIME-01 — or yours. 8.2 tonight. Flip to 8.3 = one field. Not a new model.
+2. Drop a ZIP or pick a fixture. We never run your scripts, CI, or containers.
+3. Inventory pins. Frozen Mubit task. Move only files that exist.
+4. Sapling scores **that** policy. Your correction is the next example. You merge.
+
+Snyk still finds. Your editor still edits. We are the missing middle.
+
+---
+
+## Slide 8 — Pricing (proposed, not live billing)
+
+**You already paid for the rules. Do not buy another $1,500 seat.**
+
+| | What it is |
+| --- | --- |
+| Today | **$1,200** / two-hour frontier session. Then **$1,500 / employee / tool**. |
+| Night Shift | **$0** design partner. Prove it on your house rule. |
+| Team | **$499 / mo** — 1 policy, 50 repos, review + migrate + patch. |
+| Platform | **$1,999 / mo** — many policies, 500 repos. Repo 80 is the same invoice. |
+
+Not a per-engineer copilot. One decision layer. Human still merges.
+
+---
+
+## Slide 9 — What a pin is
 
 **Four locks. All still 7.4. That is the upgrade.**
 
@@ -99,7 +139,7 @@ We change the locks so the next deploy can run a PHP that already has the fix.
 
 ---
 
-## Slide 7 — Live A/B
+## Slide 10 — Live A/B
 
 **Same gpt-6-luna. Two routes. Two request IDs.**
 
@@ -115,7 +155,7 @@ Screenshot: Fight split.
 
 ---
 
-## Slide 8 — The referee
+## Slide 11 — The referee
 
 **Banyan Sapling launched tonight. We already call it.**
 
@@ -129,7 +169,7 @@ Footer: huggingface.co/MubitLabs/banyan-sapling
 
 ---
 
-## Slide 9 — Mubit  *(export this last)*
+## Slide 12 — Mubit  *(export this last)*
 
 **DEFAULT — Silent test, not Passed**
 
@@ -157,7 +197,7 @@ If luna 401s again, say so. Do not paste a fake left column.
 
 ---
 
-## Slide 10 — Why not them
+## Slide 13 — Why not them
 
 **They find or they edit. We decide, constrain, verify, teach.**
 
@@ -168,7 +208,7 @@ FixOnce Python adapter — 136 examples, Silent test 50%. **Wrong task. We did n
 
 ---
 
-## Slide 11 — Honest limits
+## Slide 14 — Honest limits
 
 **Pins are necessary. They are not always sufficient.**
 
@@ -181,7 +221,7 @@ IppSec / Hutchins (23 Oct): most public “php2shell PoCs” are AI session-pois
 
 ---
 
-## Slide 12 — Close
+## Slide 15 — Close
 
 **One skill. 500 repos. Team rules attached. Claim scored. Human merges.**
 

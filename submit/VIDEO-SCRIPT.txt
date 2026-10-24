@@ -1,21 +1,25 @@
-OPEN PATCH — spoken track, under 3 minutes. Read as-is.
+OPEN PATCH — spoken track, under 3 minutes.
 
-Open Patch. We decide which migration is legal.
+Read like a person. Contractions. Do not say "seven-four". Do not recite a checklist.
 
-This week php2shell landed in the PHP engine, not in Invoice.php. Fixes only on 8.2.35, 8.3.36, 8.4.27, and 8.5.12. PHP 8.1 and older have no official patch. CISA said inventory, patch, or take them offline.
+This landed on October twenty-first. Remote code execution inside PHP itself. Not a bug in your invoice app. Just a box still running 7.4.
 
-Same model. Two routes. Left: gpt-6-luna as a normal engineer. Advisory plus source. No policy. Not stored. Right: the same model on our frozen Open Patch task. Both request IDs are real.
+Patches exist on four lines. 8.1 and older? Nobody's coming. CISA said find them, patch them, or take them offline. Your Composer scan will not see this.
 
-Harbor Ledger is affected at 7.4.
+So people paste the CVE into a chat. The model rewrites the calculator and says you're fine. The Dockerfile is still 7.4. Source is not the interpreter.
 
-Left guessed PHP 8.4 and named no pins. Banyan Sapling: violation, about 45 percent. Calibrated status: unsure.
+A company everyone knows burned a year of AI coding budget in four months doing that, repo after repo. Then they capped fifteen hundred dollars a head. That's what this ticket costs when you have eighty services.
 
-Right named Docker, Composer, CI, and the version file. House rule is 8.2, not a guessed 8.4. Sapling: supported, 56 percent. Unsure stays on screen. We do not turn that into a pass.
+We're at Night Shift in London. Five hundred teams. Every call through Mubit. This is Open Patch.
 
-Four locks, all still 7.4. We move the locks. We do not rewrite Invoice.php. The proposed change is a runtime upgrade from PHP 7.4 to PHP 8.2. Application source is left unchanged.
+PHP is this week's fire. Tomorrow it's Node, Python, a leftover OpenSSL, an abandoned npm lock. Review, migrate, patch — against the rules you already wrote. A team drops their ZIP. We do not rewrite their invoices. We convert the locks their house rule allows. Not another fifteen hundred dollars a head. Four ninety-nine a team. Repo eighty is the same invoice.
 
-This is the Mubit task: PatchPilot's advisory-to-migration-plan 3. One hundred and two calls. Thirty-six kept. Adapter v1 is on Silent test: 33.3 percent of a 95 percent exam. That is not Passed. We did not hide it. The cheap specialist is the loop after the legal plan, not tonight's claim.
+Same model. Two routes. Two real request IDs. Left guessed 8.4 and named nothing. Right named Docker, Composer, CI, the version file. Harbor is affected at 7.4. Nineteen seconds.
 
-Uber blew a year of AI coding budget in four months repeating frontier chats. One skill. Team rules in the user message. Claim scored. Human merges.
+Sapling called one a violation and the other supported. Both came back unsure. We left that on screen. We don't turn unsure into a pass.
 
-Ask us to run it. github.com/Ahamisi/open-patch
+Four locks moved. App source didn't. Next deploy can run a PHP that already has the fix.
+
+One frozen Mubit task. A hundred and two calls, thirty-six kept. The adapter is on Silent test — thirty-three percent of a ninety-five exam. That's not Passed. We're not hiding it. The cheap specialist is the loop after the legal plan.
+
+If you own more than one repo, this is your week. Ask us to run it. github.com/Ahamisi/open-patch

@@ -72,7 +72,34 @@ Speaker: “php2shell is one ticket class. A platform team has hundreds of repos
 
 House rule tonight: **8.2**, not a blind jump to 8.4. Flip to 8.3 = one user-message field. Not a new model.
 
-### 6 — Pins, in one picture
+### 6 — Use cases
+**Review. Migrate. Patch. Against the rules you already wrote.**
+
+- **Code review:** house line is 8.2. That reviewer note is the next plan, not another PR argument.
+- **Migration:** eighty repos, one advisory. PHP tonight. Node and Python packs already ship.
+- **Patching:** move locks that exist. Skip missing. Unsure stays. Human merges.
+
+Speaker: “Every engineering team already does these three jobs. We just stop them paying frontier to ignore their own rules.”
+
+### 7 — How you tap in
+**Bring the policy you already have.**
+
+1. Attach SEC-RUNTIME-01 or yours. Flip 8.2 → 8.3 is one field.
+2. ZIP or fixture. Scripts never run.
+3. Frozen Mubit task. Pins only.
+4. Sapling scores *that* policy. Correction is the next example. You merge.
+
+### 8 — Pricing (proposed)
+**Not a $1,500 / head copilot.**
+
+- Today: $1,200 / two-hour session, then Uber’s $1,500 / employee / tool cap.
+- Night Shift design partner: **$0**.
+- Team: **$499 / mo** — 1 policy, 50 repos.
+- Platform: **$1,999 / mo** — 500 repos, many policies. Repo 80 is the same invoice.
+
+Say “proposed, not live billing.”
+
+### 9 — Pins, in one picture
 Four locks on Harbor Ledger, all still **7.4**:
 
 | Pin | What it locks |
@@ -84,7 +111,7 @@ Four locks on Harbor Ledger, all still **7.4**:
 
 We do **not** rewrite `Invoice.php` for this CVE. We change the locks so the next deploy can run a PHP that already has the fix.
 
-### 7 — Live A/B (your fight screen)
+### 10 — Live A/B (your fight screen)
 **Same model (`gpt-6-luna`). Two routes. Two request IDs.**
 
 | | Plain frontier | Open Patch |
@@ -100,7 +127,7 @@ Screenshot: two `mreq_…` IDs.
 
 Speaker: “Claude can say the right sentence and still lose. No evidence, no team floor, Sapling calls it a violation.”
 
-### 8 — Banyan Sapling is the referee
+### 11 — Banyan Sapling is the referee
 They launched it tonight. We already call it.
 
 - Three strings: policy, evidence, claim.
@@ -111,7 +138,7 @@ Citation: https://huggingface.co/MubitLabs/banyan-sapling
 
 Speaker: “Mubit staff built this model to say when it does not know. We use that. We do not hide it.”
 
-### 9 — The Mubit loop (refresh numbers before you export)
+### 12 — The Mubit loop (refresh numbers before you export)
 **This is the slide you update last.**
 
 **As of 17:25 Sat 24 Oct (live console, innerText):**
@@ -136,7 +163,7 @@ If History later says **Passed**, keep the 401 line unless a re-run fills the le
 
 Screenshot: Tasks page + Try models with the 401 still visible.
 
-### 10 — Why not the obvious products
+### 13 — Why not the obvious products
 
 | They | We |
 | --- | --- |
@@ -145,7 +172,7 @@ Screenshot: Tasks page + Try models with the 401 still visible.
 | **Claude skill file** shares a recipe; every call still pays frontier | Mubit trains and *measures* one task |
 | **FixOnce Python adapter** (136 examples, Silent test 50%) | Wrong task. We do not steal it. |
 
-### 11 — What we will not say
+### 14 — What we will not say
 - We patched php2shell.
 - We rewrote Harbor’s PHP to 8.4.
 - Anthropic is a subscriber.
@@ -156,7 +183,7 @@ Screenshot: Tasks page + Try models with the 401 still visible.
 
 One honest limitation line: **pins are necessary, not always sufficient.** 7.4 syntax can still break on 8.2. Human approval exists for that. Source-compat is the next pass, not tonight’s claim.
 
-### 12 — Close
+### 15 — Close
 **One skill. 500 repos. Team rules attached. Claim scored. Human merges.**
 
 Repo · Fight URL · Console task name · “Ask us to run it.”
