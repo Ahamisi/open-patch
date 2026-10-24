@@ -4,6 +4,31 @@
 
 Built for Mubit [Night Shift](https://luma.com/nightshift-london), London, 24–25 Oct 2026.
 
+## Who it's for
+
+Anyone who owns more code than they can read when an engine-level advisory lands:
+
+| Team | Their week when php2shell lands | What Open Patch gives them |
+| --- | --- | --- |
+| **Platform / DevOps** owning dozens of services on shared base images | Work out which Dockerfiles, CI matrices and version files still say 7.4, repo by repo | A verdict per repo in 15–40 s and a pin-only patch they can branch and merge |
+| **Security / AppSec** who receive the advisory | Prove exposure across the fleet and stop "we fixed it" claims that only touched app code | `affected` / `not_affected` / `unknown` with the evidence behind it, an independent Sapling verdict, and a Mubit request ID per plan |
+| **Agencies and consultancies** running many client PHP sites (Laravel, WordPress, Symfony, CodeIgniter) | The same upgrade dozens of times, each with a different layout | One flow for every client repo; private code by ZIP upload |
+| **SaaS teams** with a legacy monolith plus newer services | Find the forgotten service still on an old runtime | The forgotten one shows up as `affected`; the modern ones come back `not_affected` with nothing to change |
+| **Hosting providers / MSPs** | Tell customers exactly what to change | A patch and PR description the customer can apply themselves |
+| **Teams using AI coding agents** | Agents "fix" CVEs by rewriting source | A plan that says which files may change, and that a code edit can't fix an interpreter |
+
+## Use cases
+
+1. **Engine CVE day (php2shell).** Paste each repo, get the verdict and a patch that moves the runtime to 8.2.35+, review, merge. No application code changes, so the review is a few lines.
+2. **End-of-life migrations.** PHP 7.4 EOL today; Node 16 and Python 3.8 EOL advisories run through the same checks. The house rule (for example "PHP 8.2.35 or later") is one field, so every plan follows the team's policy instead of a model's guess.
+3. **Fleet sweep.** `POST /api/fleet/check` (driven by `scripts/fleet.mjs`) runs one advisory across hundreds of public repos and returns exposure plus a Mubit plan for each. We ran 500+ repos through it on 24 Oct.
+4. **Honest triage.** Repos without a clear pin come back `unknown`, with the plan listing what's missing (production image, CI version), rather than a confident wrong answer.
+5. **Change evidence.** Each check keeps the evidence IDs, the plan's Mubit request ID, the checks that ran or were skipped, and Sapling's raw verdict: what a reviewer or a change record needs.
+6. **A guardrail for AI agents.** The pin-only plan is the brief you hand to an editor (Copilot, Claude, OpenHands). Open Patch decides what may change; the editor doesn't get to rewrite `Invoice.php`. (The editor integrations aren't wired yet.)
+7. **Learning from every review.** When a reviewer corrects a plan, the correction goes back to the same Mubit task, so the next plan for the next repo starts from the team's own judgment.
+
+**Why it matters:** an engine CVE is one ticket repeated across every repo, all year. Pasting each repo into a frontier chat costs a long session per repo and still leaves the vulnerable runtime in place; one company reportedly burned a year of AI coding budget in four months (TechCrunch, 2 Jun 2026). Open Patch turns that into one recorded, policy-bound task with a small, reviewable patch per repo.
+
 ## Try it
 
 1. Paste a public GitHub link on the home page, for example `https://github.com/sspangsberg/PHP-Calculator`, and click **Check my repo**.
@@ -27,11 +52,16 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 
 ## What the demo video shows (2:00)
 
-1. **The problem.** php2shell (CVE-2026-109618 / 109619, 21 Oct 2026) is unauthenticated RCE in PHP itself, fixed only on 8.2.35, 8.3.36, 8.4.27 and 8.5.12. A chatbot "fixes" it by rewriting app code and leaves `FROM php:7.4-apache`.
-2. **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins. The Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule.
-3. **The patch.** Only the pins move; application source doesn't.
-4. **Any repo, live.** Paste PHP-Calculator: 7.4 → 8.2, 2 files, 3 lines, applies cleanly.
-5. **The Mubit console, as it is.** One task, 660 calls, 44 kept, adapter v1 on Silent test at 33.3% of a 95% target. Not Passed, and we say so.
+| Time | What you see |
+| --- | --- |
+| 0:00–0:30 | **The problem.** php2shell (CVE-2026-109618 / 109619, 21 Oct 2026): unauthenticated RCE in PHP itself, fixed only on 8.2.35, 8.3.36, 8.4.27 and 8.5.12; 8.1 and older are out of support. |
+| 0:30–0:45 | **The wrong fix.** A chatbot rewrites the app code and says it's fixed; the Dockerfile still says `php:7.4-apache`. |
+| 0:45–0:55 | **Every call through Mubit.** Open Patch at Night Shift. |
+| 0:55–1:14 | **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins; the Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule. |
+| 1:14–1:23 | **The patch.** Four pins move; application source doesn't. |
+| 1:23–1:32 | **Any repo, live.** Paste PHP-Calculator: 7.4 → 8.2, 2 files, 3 lines, applies cleanly with `git apply`. |
+| 1:32–1:53 | **The Mubit console, as it is.** One frozen task; adapter v1 on Silent test at 33.3% of a 95% target. Not Passed, and we say so. The band shows the 22:45 numbers: 660 calls, 44 kept. |
+| 1:53–2:00 | **End card.** github.com/Ahamisi/open-patch |
 
 ## How Mubit is used
 
@@ -53,6 +83,31 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 | Verify | Banyan Sapling scores policy + evidence + claim. `unsure` stays `uncertain`. | `src/lib/sapling/client.ts` |
 
 Open Patch is not a scanner (Snyk, Sonar) and not a code editor (OpenHands, Aider). It sits between them: a finding goes in, a policy-checked, pin-only patch comes out.
+
+## Judging criteria: where to look
+
+**Use of Mubit**
+- Every LLM call goes through `https://api.mubit.ai/openai/v1` (`src/lib/llm/mubit.ts`), on one task with a frozen system prompt, model and output format. All variation is in the user message (`buildPlanUserMessage` in `src/lib/llm/plan.ts`).
+- Requests were redesigned for Mubit's training: pins only, under 15 KB, one `metadata.session_id` per repo, house rule stated, so examples are small enough to keep and consistent enough to learn.
+- 660 recorded calls on the task by 24 Oct 22:45, 500+ of them real public repos via the fleet check; 44 kept; adapter v1 trained and on a silent test.
+- Training is protected: repair retries, the Fight baseline and held-out runs send `x-middleware-store: false`; reviewer corrections go back to the same task.
+- Honest status in the app (`/api/mubit/status`) and in [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md): 33.3% vs 95%, not Passed.
+
+**Usefulness**
+- A real, current problem (php2shell) and the mistake teams actually make (patching code, not the runtime).
+- Works on any public GitHub repo or a ZIP; the test list below was run end to end.
+- The output is something a team merges today: a 2–3 line patch, branch commands and PR text.
+
+**Technical execution**
+- Intake never runs repository code; ZIP traversal, symlink, size and depth limits (`src/lib/repo/zip.ts`).
+- Exposure is computed from the pins that exist and returns `unknown` rather than guessing (`src/lib/analysis/`).
+- The patch is a real unified diff (`src/lib/patches/unified.ts`), fuzz-tested against `git apply` on 3,000 random edits; composer.json is edited in place so only the version strings change.
+- Allowlisted checks: a missing pin is skipped, a failed pin blocks `review_ready` (`src/lib/checks/`).
+- Banyan Sapling's raw verdict is kept; `unsure` is never turned into a pass (`src/lib/sapling/client.ts`).
+
+**Demo**
+- The 2-minute video (above) shows the problem, the same-model A/B, a real patch, a real repo pasted live and the console as it is.
+- Try it yourself: run it locally (Setup below) and paste one of the repos under "Repositories you can test".
 
 ## Setup
 
