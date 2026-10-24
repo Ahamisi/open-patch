@@ -108,21 +108,21 @@ Exposure is computed from whatever is actually in the archive. A modern Laravel 
 3. Plan — frozen task, live request ID.
 4. Patch — only those pins, house 8.2. Missing files skipped. Failed applicable checks block `review_ready`.
 5. Verify — Sapling often `unsure`. Leave it. Do not say php2shell is patched (PHP.net patched the engine on supported lines).
-6. Intelligence + Mubit console — plan 3, 102 calls, 36 kept, Silent test 33.3%. Not Passed. Still luna.
+6. Intelligence + Mubit console — plan 3, 660 calls, 44 kept, v1 Silent test 33.3%. Not Passed. Still luna.
 
-## Adapter status (24 Oct 2026, 17:25 London — console is authority)
+## Adapter status (24 Oct 2026, 22:45 London — console is authority)
 
 Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`).
 
 | Fact | Value |
 | --- | --- |
 | Adapter | v1, **Silent test 10%** — advisory exam, not production |
-| Exam | 33.3% vs 95% target on 12 held-out cases |
-| Calls / kept | 102 / 36 |
+| Exam | v1: 33.3% vs 95% target on 12 held-out cases (base model + prompt: 8.3%) |
+| Calls / kept | 660 / 44 (v1 trained on the first 36; most new calls not reviewed yet: daily review limit) |
 | Answered by adapter | 0.0% |
 | Served by | `gpt-6-luna` |
 
-Silent test is **not** Passed. Open Patch still calls luna. A correction is stored as an example; it does not flip the served model. We will not claim a live trained version until the console says Passed and traffic is on that version. If that happens before the film, re-run Fight and show the same Sapling task answering better. Until then the A/B is same-model, two routes.
+Silent test is **not** Passed. Open Patch still calls luna. A correction is stored as an example; it does not flip the served model. We will not claim a live trained version until the console says Passed and traffic is on that version. If that happens before the film, re-run Fight and show the same Sapling task answering better. Until then the A/B is same-model, two routes. Why 95% is not reachable tonight: [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
 
 ## Mubit task design
 
