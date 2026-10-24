@@ -275,7 +275,7 @@ export async function generateRemediationPlan(scan: Scan): Promise<{
     const repair = await callMubitTaskRaw({
       purpose: "repair",
       userContent: `${userContent}\n\nPrevious output was not valid plan JSON. Return only the plan object with summary, actions, verificationSteps, missingInformation, and humanApprovalRequired true.`,
-      recordForTraining: true,
+      recordForTraining: false,
       sessionId: scan.id,
     });
     calls.push(repair.record);

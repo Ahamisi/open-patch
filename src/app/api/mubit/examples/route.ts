@@ -1,4 +1,11 @@
-import { sendShapedExamples, sendSyntheticExamples, shapedExampleCount, syntheticExampleCount } from "@/lib/llm/synthetic";
+import {
+  compactExampleCount,
+  sendCompactExamples,
+  sendShapedExamples,
+  sendSyntheticExamples,
+  shapedExampleCount,
+  syntheticExampleCount,
+} from "@/lib/llm/synthetic";
 import { mubitConfigured } from "@/lib/config";
 import { addMubitCalls } from "@/lib/store";
 
@@ -6,6 +13,7 @@ export async function GET() {
   return Response.json({
     available: syntheticExampleCount(),
     shaped: shapedExampleCount(),
+    compact: compactExampleCount(),
     configured: mubitConfigured(),
     taskName: "advisory_to_migration_plan",
     grouping:
@@ -26,10 +34,13 @@ export async function POST(request: Request) {
     limit?: number;
     offset?: number;
     shaped?: boolean;
+    compact?: boolean;
   };
-  const records = body.shaped
-    ? await sendShapedExamples(body.limit ?? 8, body.offset ?? 0)
-    : await sendSyntheticExamples(body.limit ?? 8, body.offset ?? 0);
+  const records = body.compact
+    ? await sendCompactExamples(body.limit ?? 8, body.offset ?? 0)
+    : body.shaped
+      ? await sendShapedExamples(body.limit ?? 8, body.offset ?? 0)
+      : await sendSyntheticExamples(body.limit ?? 8, body.offset ?? 0);
   addMubitCalls(records);
   return Response.json({
     sent: records.length,

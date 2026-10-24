@@ -56,7 +56,7 @@ export type MubitCallRecord = {
   id: string;
   requestId: string | null;
   taskName: string;
-  purpose: "plan" | "repair" | "synthetic_example" | "heldout_eval";
+  purpose: "plan" | "repair" | "synthetic_example" | "heldout_eval" | "baseline";
   recordedForTraining: boolean;
   mock: boolean;
   model: string;

@@ -11,10 +11,22 @@ export async function GET() {
     consoleTaskHint: CONSOLE_TASK_HINT,
     consoleUrl: MUBIT_CONSOLE_URL,
     adapterStatus: {
-      label: "Collecting examples",
+      label: "Check Mubit console",
       authoritative: false,
       explanation:
-        "Mubit does not expose adapter state on the public inference API. Open Tasks in the console. The live grouping is PatchPilot's advisory-to-migration-plan 3. Plan 2 is an older split. Local recorded-call counts are not kept-example counts. This app never claims an adapter passed.",
+        "Mubit does not expose adapter state on the public inference API, so this app cannot read it live. Last console snapshot (24 Oct 2026, 17:25 London): PatchPilot's advisory-to-migration-plan 3, v1 on Silent test at 10%, 33.3% of 95% on 12 held-out cases, 102 calls, 36 kept, 0.0% answered by the adapter. Silent test is not Passed: every Open Patch reply is still served by gpt-6-luna. Local recorded-call counts are not kept-example counts.",
+    },
+    consoleSnapshot: {
+      observedAt: "2026-10-24T16:25:00Z",
+      source: "manual console read, not live telemetry",
+      task: CONSOLE_TASK_HINT,
+      adapterVersion: "v1",
+      adapterState: "Silent test (10%)",
+      quality: { matched: 0.333, target: 0.95, testCases: 12, result: "Below target" },
+      calls: 102,
+      keptExamples: 36,
+      answeredByAdapter: 0,
+      servedBy: "gpt-6-luna",
     },
     localCounts: {
       recordedCalls: recorded.length,

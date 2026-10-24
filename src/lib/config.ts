@@ -1,3 +1,4 @@
+/** Committed gateway. Override only if Mubit moves the OpenAI-compatible URL. */
 export const MUBIT_BASE_URL =
   process.env.MUBIT_BASE_URL ?? "https://api.mubit.ai/openai/v1";
 export const MUBIT_MODEL =

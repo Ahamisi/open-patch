@@ -37,6 +37,9 @@ export type MubitCallOptions = {
   userContent: string;
   recordForTraining: boolean;
   sessionId?: string;
+  /** Defaults to the frozen Open Patch prompt. Pass a different string only for the baseline fight. */
+  systemPrompt?: string;
+  taskName?: string;
 };
 
 export type MubitCallResult = {
@@ -48,6 +51,44 @@ function newId(prefix: string): string {
   return `${prefix}_${crypto.randomUUID()}`;
 }
 
+/**
+ * Mubit holds test cases out by session and reads it from `metadata.session_id`.
+ * Metadata does not count toward task grouping, so plan 3 stays plan 3.
+ */
+export function buildMubitRequest(options: MubitCallOptions): {
+  headers: Record<string, string>;
+  body: {
+    model: string;
+    messages: { role: "system" | "user"; content: string }[];
+    response_format: { type: "json_object" };
+    max_completion_tokens: number;
+    metadata?: { session_id: string };
+  };
+} {
+  const headers: Record<string, string> = {};
+  if (!options.recordForTraining) {
+    headers["x-middleware-store"] = "false";
+  }
+  const sessionId = options.sessionId?.trim();
+  return {
+    headers,
+    body: {
+      model: MUBIT_MODEL,
+      messages: [
+        { role: "system", content: options.systemPrompt ?? PLAN_SYSTEM_PROMPT },
+        { role: "user", content: options.userContent },
+      ],
+      response_format: { type: "json_object" },
+      max_completion_tokens: 4000,
+      ...(sessionId ? { metadata: { session_id: sessionId } } : {}),
+    },
+  };
+}
+
+export function mubitRequestId(headers: Headers): string | null {
+  return headers.get("x-middleware-request-id") ?? headers.get("x-request-id");
+}
+
 export async function callMubitTask(options: MubitCallOptions): Promise<MubitCallResult> {
   const started = Date.now();
 
@@ -57,7 +98,7 @@ export async function callMubitTask(options: MubitCallOptions): Promise<MubitCal
       record: {
         id: newId("local"),
         requestId: null,
-        taskName: TASK_NAME,
+        taskName: options.taskName ?? TASK_NAME,
         purpose: options.purpose,
         recordedForTraining: false,
         mock: true,
@@ -74,34 +115,20 @@ export async function callMubitTask(options: MubitCallOptions): Promise<MubitCal
     baseURL: MUBIT_BASE_URL,
   });
 
-  const headers: Record<string, string> = {};
-  if (!options.recordForTraining) {
-    headers["x-middleware-store"] = "false";
-  }
+  const { headers, body } = buildMubitRequest(options);
 
-  const response = await client.chat.completions.create(
-    {
-      model: MUBIT_MODEL,
-      messages: [
-        { role: "system", content: PLAN_SYSTEM_PROMPT },
-        { role: "user", content: options.userContent },
-      ],
-      response_format: { type: "json_object" },
-      max_completion_tokens: 4000,
-    },
-    { headers },
-  );
+  const { data: response, response: httpResponse } = await client.chat.completions
+    .create(body, { headers })
+    .withResponse();
 
-  const requestId =
-    (response as unknown as { _request_id?: string })._request_id ??
-    null;
+  const requestId = mubitRequestId(httpResponse.headers);
 
   return {
     content: response.choices[0]?.message?.content ?? "",
     record: {
       id: newId("mubit"),
       requestId,
-      taskName: TASK_NAME,
+      taskName: options.taskName ?? TASK_NAME,
       purpose: options.purpose,
       recordedForTraining: options.recordForTraining,
       mock: false,
@@ -121,31 +148,20 @@ export async function callMubitTaskRaw(
     throw new Error("MUBIT_API_KEY is not configured");
   }
 
+  const request = buildMubitRequest(options);
   const headers: Record<string, string> = {
     Authorization: `Bearer ${MUBIT_API_KEY}`,
     "Content-Type": "application/json",
-  };
-  if (!options.recordForTraining) {
-    headers["x-middleware-store"] = "false";
-  }
-
-  const body: Record<string, unknown> = {
-    model: MUBIT_MODEL,
-    messages: [
-      { role: "system", content: PLAN_SYSTEM_PROMPT },
-      { role: "user", content: options.userContent },
-    ],
-    response_format: { type: "json_object" },
-    max_completion_tokens: 4000,
+    ...request.headers,
   };
 
   const response = await fetch(`${MUBIT_BASE_URL}/chat/completions`, {
     method: "POST",
     headers,
-    body: JSON.stringify(body),
+    body: JSON.stringify(request.body),
   });
 
-  const requestId = response.headers.get("x-middleware-request-id");
+  const requestId = mubitRequestId(response.headers);
   const json = (await response.json()) as {
     choices?: {
       finish_reason?: string;
@@ -184,7 +200,7 @@ export async function callMubitTaskRaw(
     record: {
       id: `mubit_${crypto.randomUUID()}`,
       requestId,
-      taskName: TASK_NAME,
+      taskName: options.taskName ?? TASK_NAME,
       purpose: options.purpose,
       recordedForTraining: options.recordForTraining,
       mock: false,
