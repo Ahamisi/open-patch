@@ -10,7 +10,7 @@ Written 24 Oct 2026, 20:30 London, by the Claude engineer, after reading the liv
 
 | Fact | Value |
 | --- | --- |
-| Calls / kept | **103 / 44** (the brief said 102 / 36) |
+| Calls / kept | **103 / 44** at 20:25; **660 / 44** at 22:45 after the 500-repo fleet run (the brief said 102 / 36) |
 | Version | v1 only, Silent test 10%, "Exam: not passed (advisory)" |
 | Exam | adapter **33.3%** · base model + prompt **8.3%** · 12 test cases · needs 95% |
 | Live gate | "Live needs 20 judged test cases · this version has 12." |
@@ -37,3 +37,7 @@ The reviewer log explains the move from 36 to 44. The compact batches sent aroun
 - Send **production-shaped** cases built by `buildPlanUserMessage` from the 12 real archives in `fixtures/archives/` (Laravel 8/12, Symfony, Slim, Yii2, Cachet, phpoidc, PHP-Calculator, docker-php-sample, Flask 2.0.3, Node getting-started, node-docker-defaults). They should come with real evidence IDs, one session each, and no Harbor.
 - Prefer cases where luna's correct answer is short (`not_affected` → `actions: []`, `unknown` → one `investigate`). Those are the rows v1 got almost right and then lost on extra detail.
 - Watch the task's "Next: a new version after N new examples" line. Stop if a batch is judged 0 kept.
+
+## Update, 22:45 London
+
+After compacting requests (pins only, under 15 KB) and running 500+ public repos through `/api/fleet/check`, plan 3 shows 660 calls in 7 days and still 44 kept. The task History says "Over today's review limit: N new calls not reviewed" for most of the batch, so the reviewer has not judged them yet. v1 is unchanged: Silent test 10%, 33.3% / 95%, not Passed.

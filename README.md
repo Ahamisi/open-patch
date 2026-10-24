@@ -108,9 +108,9 @@ Exposure is computed from whatever is actually in the archive. A modern Laravel 
 3. Plan — frozen task, live request ID.
 4. Patch — only those pins, house 8.2. Missing files skipped. Failed applicable checks block `review_ready`.
 5. Verify — Sapling often `unsure`. Leave it. Do not say php2shell is patched (PHP.net patched the engine on supported lines).
-6. Intelligence + Mubit console — plan 3, 103 calls, 44 kept, v1 Silent test 33.3%. Not Passed. Still luna.
+6. Intelligence + Mubit console — plan 3, 660 calls, 44 kept, v1 Silent test 33.3%. Not Passed. Still luna.
 
-## Adapter status (24 Oct 2026, 20:25 London — console is authority)
+## Adapter status (24 Oct 2026, 22:45 London — console is authority)
 
 Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`).
 
@@ -118,7 +118,7 @@ Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`
 | --- | --- |
 | Adapter | v1, **Silent test 10%** — advisory exam, not production |
 | Exam | v1: 33.3% vs 95% target on 12 held-out cases (base model + prompt: 8.3%) |
-| Calls / kept | 103 / 44 (v1 trained on the first 36) |
+| Calls / kept | 660 / 44 (v1 trained on the first 36; most new calls not reviewed yet: daily review limit) |
 | Answered by adapter | 0.0% |
 | Served by | `gpt-6-luna` |
 
