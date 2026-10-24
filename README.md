@@ -54,14 +54,14 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 
 | Time | What you see |
 | --- | --- |
-| 0:00–0:30 | **The problem.** php2shell (CVE-2026-109618 / 109619, 21 Oct 2026): unauthenticated RCE in PHP itself, fixed only on 8.2.35, 8.3.36, 8.4.27 and 8.5.12; 8.1 and older are out of support. |
-| 0:30–0:45 | **The wrong fix.** A chatbot rewrites the app code and says it's fixed; the Dockerfile still says `php:7.4-apache`. |
-| 0:45–0:55 | **Every call through Mubit.** Open Patch at Night Shift. |
-| 0:55–1:14 | **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins; the Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule. |
-| 1:14–1:23 | **The patch.** Four pins move; application source doesn't. |
-| 1:23–1:32 | **Any repo, live.** Paste PHP-Calculator: 7.4 → 8.2, 2 files, 3 lines, applies cleanly with `git apply`. |
-| 1:32–1:53 | **The Mubit console, as it is.** One frozen task; adapter v1 on Silent test at 33.3% of a 95% target. Not Passed, and we say so. The band shows the 22:45 numbers: 660 calls, 44 kept. |
-| 1:53–2:00 | **End card.** github.com/Ahamisi/open-patch |
+| 0:00–0:26 | **The problem.** php2shell (CVE-2026-109618 / 109619, 21 Oct 2026): unauthenticated RCE in PHP itself, fixed only on 8.2.35, 8.3.36, 8.4.27 and 8.5.12; 8.1 and older are out of support. |
+| 0:26–0:41 | **The wrong fix.** A chatbot rewrites the app code and says it's fixed; the Dockerfile still says `php:7.4-apache`. |
+| 0:41–1:00 | **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins; the Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule. |
+| 1:00–1:12 | **The referee.** Banyan Sapling scores the plain route a violation (45.4%) and Open Patch supported (56.0%). Both are calibrated `unsure`, and we leave that on screen. |
+| 1:12–1:21 | **The patch.** Four pins move; application source doesn't. |
+| 1:21–1:31 | **A real repo, end to end.** Paste PHP-Calculator, Mubit plans it, the verdict shows "7.4 → 8.2, two files" with its Mubit request ID, and the three-line diff applies with `git apply`. Real app screenshots from a live run. |
+| 1:31–1:51 | **The Mubit console, as it is.** One frozen task; adapter v1 on Silent test at 33.3% of a 95% target. Not Passed, and we say so. The band shows the 22:45 numbers: 660 calls, 44 kept. |
+| 1:51–1:58 | **End card.** github.com/Ahamisi/open-patch |
 
 ## How Mubit is used
 
