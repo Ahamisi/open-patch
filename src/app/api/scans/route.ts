@@ -5,6 +5,7 @@ import { assessExposure } from "@/lib/analysis/exposure";
 import { getRepoChoice, REPO_CATALOG } from "@/lib/repo/catalog";
 import { labelUploadedRepo } from "@/lib/repo/intake";
 import { downloadPublicZip } from "@/lib/repo/fetch-zip";
+import { parseGithubRepoUrl } from "@/lib/repo/github-url";
 import { collectFromDisk } from "@/lib/repo/inventory";
 import { missingEvidence } from "@/lib/repo/missing";
 import { inventoryFromZip } from "@/lib/repo/zip";
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
   let policyId = "sec-runtime-01";
   let zip: Buffer | null = null;
   let zipFileName: string | undefined;
+  let githubUrl = "";
   let convert = false;
 
   if (contentType.includes("multipart/form-data")) {
@@ -45,6 +47,7 @@ export async function POST(request: Request) {
     advisoryText = String(form.get("advisoryText") ?? "");
     policyId = String(form.get("policyId") ?? policyId);
     convert = String(form.get("convert") ?? "") === "1";
+    githubUrl = String(form.get("githubUrl") ?? "");
     const file = form.get("zip");
     if (file instanceof File && file.size > 0) {
       zip = Buffer.from(await file.arrayBuffer());
@@ -58,6 +61,7 @@ export async function POST(request: Request) {
       advisoryText?: string;
       policyId?: string;
       convert?: boolean;
+      githubUrl?: string;
     };
     name = body.name ?? name;
     repoId = body.repoId ?? repoId;
@@ -65,6 +69,7 @@ export async function POST(request: Request) {
     advisoryText = body.advisoryText ?? "";
     policyId = body.policyId ?? policyId;
     convert = Boolean(body.convert);
+    githubUrl = body.githubUrl ?? "";
   }
 
   const advisory =
@@ -82,6 +87,18 @@ export async function POST(request: Request) {
       inventory = inventoryFromZip(zip, "uploaded-zip");
       repoSource = "upload";
       repoLabel = labelUploadedRepo(name, zipFileName);
+    } else if (githubUrl.trim()) {
+      const ref = parseGithubRepoUrl(githubUrl);
+      if (!ref) {
+        throw new Error(
+          "Paste a public GitHub repository link, like https://github.com/owner/repo or …/tree/branch.",
+        );
+      }
+      const archive = await downloadPublicZip(ref.zipUrl);
+      inventory = inventoryFromZip(archive, `github:${ref.label}`);
+      repoSource = "public_github";
+      repoLabel = ref.label;
+      if (!name.trim() || /^php scan$/i.test(name)) name = `${ref.label} scan`;
     } else if (choice?.origin === "public_github") {
       const cached = choice.localZip
         ? path.join(process.cwd(), "fixtures", "archives", choice.localZip)

@@ -43,6 +43,7 @@ export default function HomePage() {
   const [policies, setPolicies] = useState<{ id: string; title: string; note: string }[]>([]);
   const [policyId, setPolicyId] = useState("sec-runtime-01");
   const [zip, setZip] = useState<File | null>(null);
+  const [githubUrl, setGithubUrl] = useState("");
   const [busy, setBusy] = useState<"scan" | "demo" | "convert" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [demoNote, setDemoNote] = useState<string | null>(null);
@@ -93,14 +94,18 @@ export default function HomePage() {
     setError(null);
     setDemoNote(
       convert
-        ? "Reading the ZIP, planning on the frozen task, moving pins…"
+        ? !zip && githubUrl.trim()
+          ? "Downloading from GitHub, planning on the frozen task, moving pins…"
+          : "Reading the ZIP, planning on the frozen task, moving pins…"
         : null,
     );
     try {
       const form = new FormData();
       form.set("name", name);
-      form.set("repoId", zip ? "upload" : repoId);
-      form.set("advisoryId", zip && advisoryText ? "custom" : advisoryId);
+      const fromLink = !zip && githubUrl.trim().length > 0;
+      form.set("repoId", zip ? "upload" : fromLink ? "github-url" : repoId);
+      form.set("advisoryId", (zip || fromLink) && advisoryText ? "custom" : advisoryId);
+      if (fromLink) form.set("githubUrl", githubUrl.trim());
       form.set("advisoryText", advisoryText);
       form.set("policyId", policyId);
       if (convert) form.set("convert", "1");
@@ -124,6 +129,7 @@ export default function HomePage() {
       const blob = await response.blob();
       const file = new File([blob], "PHP-Calculator-7.4.zip", { type: "application/zip" });
       setZip(file);
+      setGithubUrl("");
       setName("PHP-Calculator team upload");
       setRepoId("upload");
     } catch (err) {
@@ -339,7 +345,27 @@ export default function HomePage() {
             </p>
           ) : null}
           <label className="block text-sm">
-            <span className="text-mist-300">Team ZIP — any repo they already have</span>
+            <span className="text-mist-300">Public GitHub link — any repo, no token</span>
+            <input
+              className="mt-1 w-full rounded-xl border border-ink-600 bg-ink-950 px-3 py-2 font-mono text-sm"
+              placeholder="https://github.com/owner/repo"
+              value={githubUrl}
+              onChange={(event) => {
+                const value = event.target.value;
+                setGithubUrl(value);
+                if (value.trim()) {
+                  setZip(null);
+                  const match = value.match(/github\.com\/([^/\s]+\/[^/\s#?]+)/i);
+                  if (match) setName(`${match[1].replace(/\.git$/i, "")} scan`);
+                }
+              }}
+            />
+            <span className="mt-1 block text-xs text-mist-500">
+              We download the public archive and read it. Nothing in it runs.
+            </span>
+          </label>
+          <label className="block text-sm">
+            <span className="text-mist-300">Or a team ZIP — any repo they already have</span>
             <div className="mt-1 rounded-2xl border border-dashed border-ember/40 bg-ink-950 px-4 py-5">
               <input
                 type="file"
@@ -349,6 +375,7 @@ export default function HomePage() {
                   const file = event.target.files?.[0] ?? null;
                   setZip(file);
                   if (file) {
+                    setGithubUrl("");
                     const stem = file.name.replace(/\.zip$/i, "");
                     setName(`${stem} scan`);
                   }
@@ -367,6 +394,11 @@ export default function HomePage() {
             <p className="rounded-xl border border-ember/30 px-3 py-2 text-xs leading-5 text-mist-300">
               Ready to convert <span className="font-mono text-ember">{zip.name}</span>. Catalog
               row ignored. No GitHub token. App source is not rewritten.
+            </p>
+          ) : githubUrl.trim() ? (
+            <p className="rounded-xl border border-ember/30 px-3 py-2 text-xs leading-5 text-mist-300">
+              Ready to convert <span className="font-mono text-ember">{githubUrl.trim()}</span>.
+              Catalog row ignored. No GitHub token. App source is not rewritten.
             </p>
           ) : null}
           <label className="block text-sm">
@@ -387,7 +419,9 @@ export default function HomePage() {
                 ? demoNote ?? "Converting pins…"
                 : zip
                   ? "Convert this ZIP"
-                  : "Convert selected repo"}
+                  : githubUrl.trim()
+                    ? "Convert this GitHub repo"
+                    : "Convert selected repo"}
             </button>
             <button
               type="button"

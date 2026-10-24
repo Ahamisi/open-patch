@@ -14,6 +14,11 @@ export async function downloadPublicZip(url: string): Promise<Buffer> {
       headers: { "User-Agent": "PatchPilot/0.1 (hackathon scanner; no scripts executed)" },
       redirect: "follow",
     });
+    if (response.status === 404) {
+      throw new Error(
+        "GitHub returned 404. The repository is private, renamed, or that branch does not exist. Try a public repo or drop its ZIP.",
+      );
+    }
     if (!response.ok) {
       throw new Error(`GitHub archive returned HTTP ${response.status}`);
     }
@@ -26,6 +31,11 @@ export async function downloadPublicZip(url: string): Promise<Buffer> {
       throw new Error(`Archive exceeds the ${ZIP_LIMITS.maxBytes} byte read limit.`);
     }
     return buffer;
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("GitHub took longer than 45 s to send the archive. Try again or drop its ZIP.");
+    }
+    throw error;
   } finally {
     clearTimeout(timer);
   }
