@@ -78,36 +78,11 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 | Intake | Public GitHub archive or ZIP. Nothing in the repo runs. Path traversal, symlinks, size and depth limits enforced. | `src/lib/repo/` |
 | Exposure | `affected`, `not_affected` or `unknown` from the pins that exist. Never a confident guess. | `src/lib/analysis/exposure.ts` |
 | Plan | Frozen Mubit task, compact user message, house rule PHP 8.2.35+. | `src/lib/llm/plan.ts`, `src/lib/llm/mubit.ts` |
-| Patch | Moves only pins that exist; composer.json is edited in place, so the diff stays small. | `src/lib/patches/` |
+| Patch | Moves only pins that exist; composer.json is edited in place, so the diff stays small. The patch is a real unified diff, fuzz-tested against `git apply` on 3,000 random edits. | `src/lib/patches/` |
 | Checks | Allowlisted static checks. Missing pin = skipped, failed pin = `incomplete`. | `src/lib/checks/` |
 | Verify | Banyan Sapling scores policy + evidence + claim. `unsure` stays `uncertain`. | `src/lib/sapling/client.ts` |
 
 Open Patch is not a scanner (Snyk, Sonar) and not a code editor (OpenHands, Aider). It sits between them: a finding goes in, a policy-checked, pin-only patch comes out.
-
-## Judging criteria: where to look
-
-**Use of Mubit**
-- Every LLM call goes through `https://api.mubit.ai/openai/v1` (`src/lib/llm/mubit.ts`), on one task with a frozen system prompt, model and output format. All variation is in the user message (`buildPlanUserMessage` in `src/lib/llm/plan.ts`).
-- Requests were redesigned for Mubit's training: pins only, under 15 KB, one `metadata.session_id` per repo, house rule stated, so examples are small enough to keep and consistent enough to learn.
-- 660 recorded calls on the task by 24 Oct 22:45, 500+ of them real public repos via the fleet check; 44 kept; adapter v1 trained and on a silent test.
-- Training is protected: repair retries, the Fight baseline and held-out runs send `x-middleware-store: false`; reviewer corrections go back to the same task.
-- Honest status in the app (`/api/mubit/status`) and in [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md): 33.3% vs 95%, not Passed.
-
-**Usefulness**
-- A real, current problem (php2shell) and the mistake teams actually make (patching code, not the runtime).
-- Works on any public GitHub repo or a ZIP; the test list below was run end to end.
-- The output is something a team merges today: a 2–3 line patch, branch commands and PR text.
-
-**Technical execution**
-- Intake never runs repository code; ZIP traversal, symlink, size and depth limits (`src/lib/repo/zip.ts`).
-- Exposure is computed from the pins that exist and returns `unknown` rather than guessing (`src/lib/analysis/`).
-- The patch is a real unified diff (`src/lib/patches/unified.ts`), fuzz-tested against `git apply` on 3,000 random edits; composer.json is edited in place so only the version strings change.
-- Allowlisted checks: a missing pin is skipped, a failed pin blocks `review_ready` (`src/lib/checks/`).
-- Banyan Sapling's raw verdict is kept; `unsure` is never turned into a pass (`src/lib/sapling/client.ts`).
-
-**Demo**
-- The 2-minute video (above) shows the problem, the same-model A/B, a real patch, a real repo pasted live and the console as it is.
-- Try it yourself: run it locally (Setup below) and paste one of the repos under "Repositories you can test".
 
 ## Setup
 
