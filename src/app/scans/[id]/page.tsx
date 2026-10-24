@@ -19,6 +19,7 @@ function ScanWorkspace() {
   const params = useParams<{ id: string }>();
   const search = useSearchParams();
   const fromDemo = search.get("demo") === "1";
+  const converted = search.get("converted") === "1";
   const [scan, setScan] = useState<PublicScan | null>(null);
   const [corrections, setCorrections] = useState<Correction[]>([]);
   const [step, setStep] = useState<(typeof STEPS)[number]>("Evidence");
@@ -44,6 +45,7 @@ function ScanWorkspace() {
         if (data.error) throw new Error(data.error);
         setScan(data.scan);
         setCorrections(data.corrections ?? []);
+        if (converted || (fromDemo && data.scan?.patch)) setStep("Patch");
       })
       .catch((err) => {
         if (!cancelled) setError(err.message);
@@ -51,7 +53,7 @@ function ScanWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, [params.id]);
+  }, [params.id, converted, fromDemo]);
 
   async function post(path: string, nextStep: (typeof STEPS)[number], body?: unknown) {
     setBusy(path);
@@ -145,7 +147,18 @@ function ScanWorkspace() {
         ))}
       </div>
 
-      {fromDemo ? (
+      {converted ? (
+        <div className="panel px-5 py-4 text-sm text-mist-300">
+          <p className="text-xs uppercase tracking-[0.18em] text-ember">
+            Team ZIP converted — pins, not app source
+          </p>
+          <p className="mt-1">
+            They dropped the archive. We planned on the frozen task, moved only locks that exist,
+            ran checks, and scored the claim. Walk the hunks. Invoice.php (or equivalent) is not
+            in the diff. A human still merges.
+          </p>
+        </div>
+      ) : fromDemo ? (
         <div className="panel px-5 py-4 text-sm text-mist-300">
           <p className="text-xs uppercase tracking-[0.18em] text-ember">Live demo is already run</p>
           <p className="mt-1">

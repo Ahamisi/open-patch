@@ -43,7 +43,7 @@ export default function HomePage() {
   const [policies, setPolicies] = useState<{ id: string; title: string; note: string }[]>([]);
   const [policyId, setPolicyId] = useState("sec-runtime-01");
   const [zip, setZip] = useState<File | null>(null);
-  const [busy, setBusy] = useState<"scan" | "demo" | null>(null);
+  const [busy, setBusy] = useState<"scan" | "demo" | "convert" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [demoNote, setDemoNote] = useState<string | null>(null);
 
@@ -87,10 +87,15 @@ export default function HomePage() {
     }
   }
 
-  async function analyze(event: React.FormEvent) {
+  async function analyze(event: { preventDefault: () => void }, convert = false) {
     event.preventDefault();
-    setBusy("scan");
+    setBusy(convert ? "convert" : "scan");
     setError(null);
+    setDemoNote(
+      convert
+        ? "Reading the ZIP, planning on the frozen task, moving pins…"
+        : null,
+    );
     try {
       const form = new FormData();
       form.set("name", name);
@@ -98,15 +103,31 @@ export default function HomePage() {
       form.set("advisoryId", zip && advisoryText ? "custom" : advisoryId);
       form.set("advisoryText", advisoryText);
       form.set("policyId", policyId);
+      if (convert) form.set("convert", "1");
       if (zip) form.set("zip", zip);
       const response = await fetch("/api/scans", { method: "POST", body: form });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Scan failed");
-      router.push(`/scans/${data.scan.id}`);
+      router.push(convert ? `/scans/${data.scan.id}?converted=1` : `/scans/${data.scan.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Scan failed");
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function usePublicTeamZip() {
+    setError(null);
+    try {
+      const response = await fetch("/api/demo/sample-zip");
+      if (!response.ok) throw new Error("Could not fetch the sample team ZIP");
+      const blob = await response.blob();
+      const file = new File([blob], "PHP-Calculator-7.4.zip", { type: "application/zip" });
+      setZip(file);
+      setName("PHP-Calculator team upload");
+      setRepoId("upload");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sample ZIP failed");
     }
   }
 
@@ -130,17 +151,23 @@ export default function HomePage() {
         </p>
         <div className="relative mt-8 flex flex-wrap items-center gap-3">
           <a
-            href="/fight"
+            href="#drop-repo"
             className="rounded-full bg-ember px-6 py-3 text-sm font-semibold text-ink-950"
           >
-            The knockout — same CVE, two plans
+            Drop a team ZIP — we convert the pins
+          </a>
+          <a
+            href="/fight"
+            className="rounded-full border border-ink-600 px-6 py-3 text-sm"
+          >
+            Same CVE, two plans
           </a>
           <button
             onClick={runDemo}
             disabled={busy !== null}
             className="rounded-full border border-ink-600 px-6 py-3 text-sm disabled:opacity-60"
           >
-            {busy === "demo" ? demoNote ?? "Running live demo…" : "Harbor Ledger only"}
+            {busy === "demo" ? demoNote ?? "Running live demo…" : "Harbor fixture only"}
           </button>
         </div>
         {error ? <p className="relative mt-4 text-sm text-signal-affected">{error}</p> : null}
@@ -212,12 +239,17 @@ export default function HomePage() {
       </section>
 
       <section className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <form className="panel space-y-5 p-8" onSubmit={analyze}>
-          <p className="text-xs uppercase tracking-[0.22em] text-mist-500">New scan</p>
-          <h2 className="text-2xl font-semibold">Inspect a repository</h2>
+        <form
+          id="drop-repo"
+          className="panel space-y-5 p-8"
+          onSubmit={(event) => analyze(event, true)}
+        >
+          <p className="text-xs uppercase tracking-[0.22em] text-mist-500">Team upload</p>
+          <h2 className="text-2xl font-semibold">Drop their ZIP. We convert the pins.</h2>
           <p className="text-sm text-mist-300">
-            Upload any repo. Pick PHP, Node, or Python advisories. Harbor Ledger is only the
-            reliable PHP 7.4 fixture — not the only language.
+            A platform team hands you the archive. We inventory locks, plan on the frozen Mubit
+            task, move only files that exist under your house rule, and score the claim. We do
+            not rewrite their app source. Scripts never run.
           </p>
           <label className="block text-sm">
             <span className="text-mist-300">Scan name</span>
@@ -307,25 +339,34 @@ export default function HomePage() {
             </p>
           ) : null}
           <label className="block text-sm">
-            <span className="text-mist-300">Or upload a ZIP of any repo</span>
-            <input
-              type="file"
-              accept=".zip"
-              className="mt-1 block w-full text-sm text-mist-300"
-              onChange={(event) => {
-                const file = event.target.files?.[0] ?? null;
-                setZip(file);
-                if (file) {
-                  const stem = file.name.replace(/\.zip$/i, "");
-                  setName(`${stem} scan`);
-                }
-              }}
-            />
+            <span className="text-mist-300">Team ZIP — any repo they already have</span>
+            <div className="mt-1 rounded-2xl border border-dashed border-ember/40 bg-ink-950 px-4 py-5">
+              <input
+                type="file"
+                accept=".zip"
+                className="block w-full text-sm text-mist-300"
+                onChange={(event) => {
+                  const file = event.target.files?.[0] ?? null;
+                  setZip(file);
+                  if (file) {
+                    const stem = file.name.replace(/\.zip$/i, "");
+                    setName(`${stem} scan`);
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={usePublicTeamZip}
+                className="mt-3 text-xs text-ember underline"
+              >
+                No ZIP handy? Use a public PHP 7.4 team repo (PHP-Calculator)
+              </button>
+            </div>
           </label>
           {zip ? (
             <p className="rounded-xl border border-ember/30 px-3 py-2 text-xs leading-5 text-mist-300">
-              Using your ZIP <span className="font-mono text-ember">{zip.name}</span>. The catalog
-              row (including Harbor Ledger) is ignored. No GitHub token. Scripts stay unexecuted.
+              Ready to convert <span className="font-mono text-ember">{zip.name}</span>. Catalog
+              row ignored. No GitHub token. App source is not rewritten.
             </p>
           ) : null}
           <label className="block text-sm">
@@ -336,15 +377,30 @@ export default function HomePage() {
               onChange={(event) => setAdvisoryText(event.target.value)}
             />
           </label>
-          <button
-            type="submit"
-            disabled={busy !== null}
-            className="rounded-full border border-ember/40 px-5 py-2.5 text-sm font-semibold text-ember disabled:opacity-60"
-          >
-            {busy === "scan" ? "Inspecting repository…" : "Analyze repository"}
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={busy !== null}
+              className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink-950 disabled:opacity-60"
+            >
+              {busy === "convert"
+                ? demoNote ?? "Converting pins…"
+                : zip
+                  ? "Convert this ZIP"
+                  : "Convert selected repo"}
+            </button>
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={(event) => analyze(event, false)}
+              className="rounded-full border border-ink-600 px-5 py-2.5 text-sm disabled:opacity-60"
+            >
+              {busy === "scan" ? "Inspecting…" : "Inspect only"}
+            </button>
+          </div>
           <p className="text-xs leading-5 text-mist-500">
-            Repository scripts, Composer hooks, and CI commands are never executed.
+            Convert = plan + pin patch + checks + Sapling. Inspect only = inventory. Scripts,
+            Composer hooks, and CI never run. A human still merges.
           </p>
         </form>
 

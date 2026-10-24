@@ -3,18 +3,18 @@ import Link from "next/link";
 const ACTS = [
   {
     n: "01",
-    title: "Hook — php2shell, not a chatbot",
-    body: "Patches exist only on PHP 8.2+. Harbor Ledger is still on 7.4. A source edit cannot fix the interpreter. That is why this is a recurring task, not a one-off Claude chat.",
+    title: "A team drops their ZIP",
+    body: "On Scans, upload their archive — or click “Use a public PHP 7.4 team repo.” Convert this ZIP. That is the customer motion: they bring the code, we convert the pins under their house rule. Scripts never run.",
   },
   {
     n: "02",
-    title: "Evidence — Harbor Ledger is affected",
-    body: "Dockerfile php:7.4-apache, Composer <8.0, CI 7.4. Missing production OS stays unknown. Click Analyze, then Create remediation plan. A real Mubit request ID appears.",
+    title: "The conversion — locks, not Invoice.php",
+    body: "Plan on the frozen Mubit task. Dockerfile / composer / CI / .php-version move to 8.2. Application source is not in the diff. Missing files are skipped. review_ready still means a human approves.",
   },
   {
     n: "03",
-    title: "Patch + checks — pins that exist",
-    body: "Generate the 8.2 pin patch. Run checks. Missing files are skipped, not failed. review_ready means the pins that existed moved. A human still has to approve.",
+    title: "Fight — why convert beats a chat",
+    body: "Same CVE, two routes. Left guessed 8.4 and named no pins. Right named the four locks. Two real request IDs.",
   },
   {
     n: "04",
@@ -64,21 +64,21 @@ export default function DemoPage() {
           The demo we will walk.
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-mist-300">
-          Harbor Ledger is a synthetic 7.4 fixture. Mubit, Sapling, and check exit codes are live.
-          A first-time owner can also upload any ZIP on Scans — no GitHub token. Scripts never run.
+          Lead with a team ZIP. Harbor Ledger is only the reliable fixture if you need a
+          deterministic 7.4 pin. Mubit, Sapling, and checks are live. Scripts never run.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href="/fight"
+            href="/#drop-repo"
             className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink-950"
           >
-            Film the fight
+            Convert a team ZIP
           </Link>
           <Link
-            href="/"
+            href="/fight"
             className="rounded-full border border-ink-600 px-5 py-2.5 text-sm"
           >
-            Start from Scans
+            Then film the fight
           </Link>
           <a
             href="https://app.mubit.ai"

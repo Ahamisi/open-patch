@@ -109,12 +109,20 @@ export default function FightPage() {
             {busy ? stage : result ? "Run the A/B again" : "Route it both ways"}
           </button>
           {result ? (
-            <Link
-              href={`/scans/${result.scan.id}?demo=1`}
-              className="rounded-full border border-ink-600 px-5 py-2.5 text-sm"
-            >
-              Continue to correction
-            </Link>
+            <>
+              <Link
+                href={`/scans/${result.scan.id}?demo=1`}
+                className="rounded-full border border-ink-600 px-5 py-2.5 text-sm"
+              >
+                Continue to correction
+              </Link>
+              <Link
+                href="/#drop-repo"
+                className="rounded-full border border-ink-600 px-5 py-2.5 text-sm"
+              >
+                Convert a team ZIP
+              </Link>
+            </>
           ) : null}
         </div>
         {error ? <p className="relative mt-4 text-sm text-signal-affected">{error}</p> : null}

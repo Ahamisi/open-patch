@@ -9,8 +9,11 @@ import { collectFromDisk } from "@/lib/repo/inventory";
 import { missingEvidence } from "@/lib/repo/missing";
 import { inventoryFromZip } from "@/lib/repo/zip";
 import { getPolicyChoice, POLICY_CATALOG } from "@/lib/policy";
+import { completeConversion } from "@/lib/demo/convert";
 import { publicScan } from "@/lib/public-scan";
 import { getScan, listScans, saveScan, type Scan } from "@/lib/store";
+
+export const maxDuration = 60;
 
 const FIXTURE_ROOT = path.join(process.cwd(), "fixtures", "repos", "legacy-billing-php");
 
@@ -32,6 +35,7 @@ export async function POST(request: Request) {
   let policyId = "sec-runtime-01";
   let zip: Buffer | null = null;
   let zipFileName: string | undefined;
+  let convert = false;
 
   if (contentType.includes("multipart/form-data")) {
     const form = await request.formData();
@@ -40,6 +44,7 @@ export async function POST(request: Request) {
     advisoryId = String(form.get("advisoryId") ?? advisoryId);
     advisoryText = String(form.get("advisoryText") ?? "");
     policyId = String(form.get("policyId") ?? policyId);
+    convert = String(form.get("convert") ?? "") === "1";
     const file = form.get("zip");
     if (file instanceof File && file.size > 0) {
       zip = Buffer.from(await file.arrayBuffer());
@@ -52,12 +57,14 @@ export async function POST(request: Request) {
       advisoryId?: string;
       advisoryText?: string;
       policyId?: string;
+      convert?: boolean;
     };
     name = body.name ?? name;
     repoId = body.repoId ?? repoId;
     advisoryId = body.advisoryId ?? advisoryId;
     advisoryText = body.advisoryText ?? "";
     policyId = body.policyId ?? policyId;
+    convert = Boolean(body.convert);
   }
 
   const advisory =
@@ -133,5 +140,8 @@ export async function POST(request: Request) {
   };
 
   saveScan(scan);
-  return Response.json({ scan: publicScan(getScan(scan.id)!) });
+  if (convert) {
+    await completeConversion(scan);
+  }
+  return Response.json({ scan: publicScan(getScan(scan.id)!), converted: convert });
 }
