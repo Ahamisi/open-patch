@@ -21,6 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, []);
 
   const links = [
+    { href: "/fight", label: "Fight" },
     { href: "/", label: "Scans" },
     { href: "/demo", label: "Demo" },
     { href: "/learning", label: "Intelligence" },

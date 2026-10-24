@@ -69,8 +69,14 @@ export default function DemoPage() {
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href="/"
+            href="/fight"
             className="rounded-full bg-ember px-5 py-2.5 text-sm font-semibold text-ink-950"
+          >
+            Film the fight
+          </Link>
+          <Link
+            href="/"
+            className="rounded-full border border-ink-600 px-5 py-2.5 text-sm"
           >
             Start from Scans
           </Link>

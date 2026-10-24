@@ -122,22 +122,26 @@ export default function HomePage() {
           <span className="block text-mist-300">The system that decides which migration is legal.</span>
         </h1>
         <p className="relative mt-5 max-w-2xl text-base leading-7 text-mist-300">
-          Snyk finds the CVE. OpenHands and Aider will edit the tree. Open Patch sits in the
-          gap: which kind of fix is allowed, which pins actually exist, whether the claim holds,
-          and whether last week&apos;s correction still applies. PHP 7.4 is this month&apos;s
-          fire. The task is any unsupported runtime.
+          For a platform or security engineer who owns many legacy PHP repos: when a runtime
+          advisory lands, run this instead of a two-hour Claude paste per tree. Snyk finds the
+          CVE. OpenHands and Aider edit the tree. Open Patch decides which pin move is legal,
+          whether the claim holds, and whether last week&apos;s correction still applies. PHP
+          7.4 / php2shell is this week&apos;s fire. The task is any unsupported runtime.
         </p>
         <div className="relative mt-8 flex flex-wrap items-center gap-3">
+          <a
+            href="/fight"
+            className="rounded-full bg-ember px-6 py-3 text-sm font-semibold text-ink-950"
+          >
+            The knockout — same CVE, two plans
+          </a>
           <button
             onClick={runDemo}
             disabled={busy !== null}
-            className="rounded-full bg-ember px-6 py-3 text-sm font-semibold text-ink-950 disabled:opacity-60"
+            className="rounded-full border border-ink-600 px-6 py-3 text-sm disabled:opacity-60"
           >
-            {busy === "demo" ? demoNote ?? "Running live demo…" : "Run the live Harbor Ledger demo"}
+            {busy === "demo" ? demoNote ?? "Running live demo…" : "Harbor Ledger only"}
           </button>
-          <p className="text-xs text-mist-500">
-            Real Mubit call. Real Sapling verdict. About 20–40 seconds.
-          </p>
         </div>
         {error ? <p className="relative mt-4 text-sm text-signal-affected">{error}</p> : null}
       </section>
