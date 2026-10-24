@@ -28,5 +28,5 @@ const TONE: Record<string, string> = {
 
 export function StatusBadge({ value }: { value: string | null | undefined }) {
   const key = (value ?? "unknown").toLowerCase();
-  return <span className={`chip ${TONE[key] ?? "border-ink-600 text-mist-300"}`}>{value ?? "unknown"}</span>;
+  return <span className={`chip ${TONE[key] ?? "border-ink-600 text-mist-300"}`}>{(value ?? "unknown").replace(/_/g, " ")}</span>;
 }

@@ -28,18 +28,7 @@ import {
 } from "@/lib/analysis/python-version";
 import { findFile } from "@/lib/repo/inventory";
 import type { PatchHunk, ProposedPatch, RepoFile, Scan } from "@/lib/store";
-
-function unified(path: string, before: string, after: string): string {
-  const beforeLines = before.split("\n");
-  const afterLines = after.split("\n");
-  return [
-    `--- a/${path}`,
-    `+++ b/${path}`,
-    `@@ -1,${beforeLines.length} +1,${afterLines.length} @@`,
-    ...beforeLines.map((line) => `-${line}`),
-    ...afterLines.map((line) => `+${line}`),
-  ].join("\n");
-}
+import { unifiedPatch } from "@/lib/patches/unified";
 
 export function findCiFile(
   files: RepoFile[],
@@ -67,7 +56,7 @@ function emptyPatch(scan: Scan): ProposedPatch {
     prBody: [
       scan.exposure.reason,
       "",
-      "Human approval is required. PatchPilot did not invent a runtime fix from missing evidence.",
+      "Human approval is required. Open Patch did not invent a runtime fix from missing evidence.",
     ].join("\n"),
   };
 }
@@ -79,7 +68,7 @@ function finishPatch(scan: Scan, hunks: PatchHunk[], fromLabel: string, toLabel:
       hunks.length > 0
         ? `Upgrade ${name} runtime pins from ${fromLabel} to ${toLabel}. Application source is left unchanged because this is a platform finding.`
         : `${fromLabel} exposure was detected, but no rewriteable runtime pin was present.`,
-    unifiedDiff: hunks.map((hunk) => unified(hunk.path, hunk.before, hunk.after)).join("\n\n"),
+    unifiedDiff: unifiedPatch(hunks),
     hunks,
     prTitle:
       hunks.length > 0
