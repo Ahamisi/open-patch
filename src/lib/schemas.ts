@@ -70,7 +70,8 @@ export const remediationActionSchema = z.object({
 
 export const remediationPlanSchema = z.object({
   summary: z.string(),
-  actions: z.array(remediationActionSchema).min(1),
+  // Empty is a valid answer: nothing to change when the repo is not affected.
+  actions: z.array(remediationActionSchema),
   verificationSteps: z.array(z.string()),
   missingInformation: z.array(z.string()).default([]),
   humanApprovalRequired: z

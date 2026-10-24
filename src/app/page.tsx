@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/components/StatusBadge";
 
 type Advisory = { id: string; title: string };
-type Policy = { id: string; title: string; note: string };
 type RepoChoice = { id: string; name: string; origin: "synthetic_fixture" | "public_github" };
 type RecentScan = { id: string; name: string; exposure: { status: string }; createdAt: string };
 
@@ -38,9 +37,8 @@ export default function HomePage() {
   const [offlineRepo, setOfflineRepo] = useState("");
   const [advisoryId, setAdvisoryId] = useState("php-74-eol");
   const [advisoryText, setAdvisoryText] = useState("");
-  const [policyId, setPolicyId] = useState("sec-runtime-01");
+  const policyId = "sec-runtime-01";
   const [advisories, setAdvisories] = useState<Advisory[]>([]);
-  const [policies, setPolicies] = useState<Policy[]>([]);
   const [repos, setRepos] = useState<RepoChoice[]>([]);
   const [recent, setRecent] = useState<RecentScan[]>([]);
   const [busy, setBusy] = useState(false);
@@ -53,7 +51,6 @@ export default function HomePage() {
       .then((response) => response.json())
       .then((data) => {
         setAdvisories(data.advisories ?? []);
-        setPolicies(data.policies ?? []);
         setRepos(data.repos ?? []);
         setRecent(data.scans ?? []);
       })
@@ -234,23 +231,6 @@ export default function HomePage() {
                     </option>
                   ),
                 )}
-              </select>
-            </label>
-            <label className="block text-sm">
-              <span className="text-mist-300">Team policy</span>
-              <select
-                className="mt-1 w-full rounded-xl border border-ink-600 bg-ink-950 px-3 py-2"
-                value={policyId}
-                onChange={(event) => setPolicyId(event.target.value)}
-              >
-                {(policies.length
-                  ? policies
-                  : [{ id: "sec-runtime-01", title: "Supported line 8.2", note: "" }]
-                ).map((policy) => (
-                  <option key={policy.id} value={policy.id}>
-                    {policy.title}
-                  </option>
-                ))}
               </select>
             </label>
             <label className="block text-sm">
