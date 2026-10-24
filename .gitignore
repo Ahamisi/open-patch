@@ -1,12 +1,39 @@
+# dependencies and build
 node_modules
 .next
 out
 dist
 coverage
-data/*.json
-!data/.gitkeep
-.env
-.DS_Store
-*.log
 tsconfig.tsbuildinfo
 next-env.d.ts
+
+# secrets and local store — never ship
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+credentials.json
+
+# runtime data
+data/*.json
+!data/.gitkeep
+
+# junk
+.DS_Store
+*.log
+.vercel
+
+# demo tape for the video LLM — keep off GitHub
+open-patch-video-export/
+open-patch-video-export.zip
+
+# submit/ markdown can be committed; recordings and stills stay local
+submit/*.webm
+submit/*.mov
+submit/*.mp4
+submit/demo-*.png
+submit/Screenshot*.png
+submit/Screen Recording*
+submit/demo-raw/
+submit/CLAUDE-MUBIT-AUDIT.md

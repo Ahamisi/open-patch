@@ -1,0 +1,21 @@
+OPEN PATCH — spoken track, under 3 minutes. Read as-is.
+
+Open Patch. We decide which migration is legal.
+
+This week php2shell landed in the PHP engine, not in Invoice.php. Fixes only on 8.2.35, 8.3.36, 8.4.27, and 8.5.12. PHP 8.1 and older have no official patch. CISA said inventory, patch, or take them offline.
+
+Same model. Two routes. Left: gpt-6-luna as a normal engineer. Advisory plus source. No policy. Not stored. Right: the same model on our frozen Open Patch task. Both request IDs are real.
+
+Harbor Ledger is affected at 7.4.
+
+Left guessed PHP 8.4 and named no pins. Banyan Sapling: violation, about 45 percent. Calibrated status: unsure.
+
+Right named Docker, Composer, CI, and the version file. House rule is 8.2, not a guessed 8.4. Sapling: supported, 56 percent. Unsure stays on screen. We do not turn that into a pass.
+
+Four locks, all still 7.4. We move the locks. We do not rewrite Invoice.php. The proposed change is a runtime upgrade from PHP 7.4 to PHP 8.2. Application source is left unchanged.
+
+This is the Mubit task: PatchPilot's advisory-to-migration-plan 3. One hundred and two calls. Thirty-six kept. Adapter v1 is on Silent test: 33.3 percent of a 95 percent exam. That is not Passed. We did not hide it. The cheap specialist is the loop after the legal plan, not tonight's claim.
+
+Uber blew a year of AI coding budget in four months repeating frontier chats. One skill. Team rules in the user message. Claim scored. Human merges.
+
+Ask us to run it. github.com/Ahamisi/open-patch
