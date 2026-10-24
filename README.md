@@ -1,57 +1,58 @@
 # Open Patch
 
-**Who runs this:** a platform or security engineer who owns many legacy PHP (and later Node/Python) repos.
+**php2shell is a bug in the PHP engine, not in your app.** Rewriting `Invoice.php` doesn't fix it; moving the runtime to a patched PHP does. Open Patch takes a repository, finds the PHP version it actually runs, plans the upgrade under your team's policy with [Mubit](https://docs.mubit.ai/), and hands you a patch that changes only the version pins. A person reviews and merges.
 
-**Recurring job:** when a runtime advisory lands — this week [php2shell](https://www.php.net/) / PHP 7.4 EOL — decide which pin move is legal, once, instead of pasting each tree into Claude and leaving `FROM php:7.4-apache` in place. That class of work is a two-hour frontier session per repo. Uber burned a year of AI coding budget in four months doing it.
+Built for Mubit [Night Shift](https://luma.com/nightshift-london), London, 24–25 Oct 2026.
 
-Policy-aware runtime migrations with independently verified evidence and a [Mubit](https://docs.mubit.ai/) learning loop. Built for [Night Shift](https://luma.com/nightshift-london).
+## Try it
 
-This is **not** another Snyk / OpenHands / Aider. Those find CVEs or edit trees. Open Patch decides which *kind* of migration is legal, checks the claim with [Banyan Sapling](https://huggingface.co/MubitLabs/banyan-sapling), and keeps reviewer corrections on one frozen Mubit task. PHP 7.4 is this month’s fire, not the product.
+1. Paste a public GitHub link on the home page, for example `https://github.com/sspangsberg/PHP-Calculator`, and click **Check my repo**.
+2. In 15–40 s you get the verdict: **"PHP 7.4 → 8.2. 2 files to change."**, the Mubit request ID for the plan, and Banyan Sapling's verdict shown as returned (`unsure` stays `unsure`).
+3. **Download patch** gives a `git apply`-ready file. **Copy branch commands** gives `git checkout -b open-patch/php-8.2 && git apply … && git commit && git push`, plus the GitHub compare link to open the PR.
 
-The Mubit system prompt still starts with `You are PatchPilot's advisory-to-migration-plan task.` That string is frozen so training does not restart. Do not rename it.
+For PHP-Calculator the whole patch is three lines:
 
-## What the repo shows (after this push)
+```diff
+--- a/dockerfile
+-FROM php:7.4-fpm-alpine
++FROM php:8.2-fpm-alpine
+--- a/composer.json
+-            "php": "7.4.0"
++            "php": "8.2.35"
+-        "php": ">=7.4.0",
++        "php": ">=8.2 <8.4",
+```
 
-| Path | What Max can confirm |
-| --- | --- |
-| `src/lib/llm/mubit.ts` | All app LLM calls go through `https://api.mubit.ai/openai/v1`. `metadata.session_id` is sent. Held-out / baseline / repair use `x-middleware-store: false`. |
-| `src/lib/config.ts` | Committed default `MUBIT_BASE_URL`. Key stays in `.env`. |
-| `src/app/fight` + `src/app/api/demo/fight` | Same-model A/B: ChatGPT-shaped paste (`store:false`) vs frozen plan 3. Two live `mreq_` IDs. Dual Sapling. |
-| `src/lib/checks/run.ts` + `src/lib/checks/readiness.ts` | Missing pins are `not_run` (skipped). A failed applicable check keeps the scan `incomplete`. |
-| `src/lib/sapling/client.ts` | `unsure` / insufficient / inconsistent stay `uncertain`. Never converted to pass. |
-| `/api/mubit/status` | Honest snapshot. Adapter is **not** live. Silent test is not Passed. |
+It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo doesn't pin its version, the answer is **unknown** and the plan says what's missing; it doesn't guess.
 
-## What it does
+## What the demo video shows (2:00)
 
-1. Inventories a bundled PHP fixture (or an uploaded ZIP) without executing repository scripts.
-2. Compares runtime/dependency evidence to a seeded advisory and returns `affected`, `not_affected`, or `unknown`.
-3. Asks Mubit for a structured remediation plan (`advisory_to_migration_plan`).
-4. Proposes a small config/runtime diff for the pins that actually exist, runs allowlisted static checks, and marks the scan `review_ready` only when those checks pass.
-5. Sends a specific claim, policy, and evidence to Banyan Sapling and keeps the raw verdict, including `unsure`.
-6. Records human corrections. It does **not** claim that a correction instantly trained a model.
+1. **The problem.** php2shell (CVE-2026-109618 / 109619, 21 Oct 2026) is unauthenticated RCE in PHP itself, fixed only on 8.2.35, 8.3.36, 8.4.27 and 8.5.12. A chatbot "fixes" it by rewriting app code and leaves `FROM php:7.4-apache`.
+2. **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins. The Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule.
+3. **The patch.** Only the pins move; application source doesn't.
+4. **Any repo, live.** Paste PHP-Calculator: 7.4 → 8.2, 2 files, 3 lines, applies cleanly.
+5. **The Mubit console, as it is.** One task, 660 calls, 44 kept, adapter v1 on Silent test at 33.3% of a 95% target. Not Passed, and we say so.
 
-## Failed, skipped, and unsure (do not invent pass)
+## How Mubit is used
 
-| Signal | What the code does |
-| --- | --- |
-| Pin file missing (no Dockerfile, no CI, no `.php-version`) | Check status `not_run`. Listed on the scan as skipped. **Not a fail.** |
-| Pin exists and still on the old line after the proposed patch | Check status `fail`. Readiness stays `incomplete`. Not `review_ready`. |
-| Exposure `unknown` | Readiness `investigation`. Collect the missing runtime/OS fact first. |
-| Exposure `not_affected` | Readiness `no_change`. No invented source edit. |
-| Affected but no rewriteable pin | Readiness `no_change`. We will not invent an `Invoice.php` edit. |
-| Sapling `unsure`, `insufficient_information`, or `inconsistent_context` | Verification status `uncertain`. Left on screen. Not treated as supported. |
-| Sapling unavailable | Verification `unavailable`. Deterministic checks are the only automated signal. |
+- **One frozen task.** Every plan is a call to one Mubit task, `PatchPilot's advisory-to-migration-plan 3`, through `https://api.mubit.ai/openai/v1` with the same system prompt, model (`gpt-6-luna`) and JSON output format. The prompt is frozen on purpose: changing one word would start a new task and lose the kept examples. Repo evidence, advisory, house rule and reviewer notes all travel in the user message.
+- **Small, keepable requests.** We send Mubit only the evidence that decides the runtime (Dockerfile, manifests, CI, version files), never application source. That cut requests from up to 330 KB to under 15 KB and plan latency from about 40 s to 12–16 s.
+- **Real traffic as training data.** Each check is one recorded call with its own `metadata.session_id`. On 24 Oct we ran 500+ public PHP, Node and Python repos through `POST /api/fleet/check` (`scripts/fleet.mjs`): 660 calls on the task in 7 days.
+- **Corrections close the loop.** A reviewer's correction is sent back to the same task as a new example. Repair retries, the Fight baseline and held-out evaluation use `x-middleware-store: false`, so they can't pollute training.
+- **Honest status.** The adapter (Qwen3-4B, v1) scores 33.3% against Mubit's 95% target, with the base model alone at 8.3%. It is on a 10% silent test, not Passed, so every reply is still `gpt-6-luna`. Mubit's daily review limit left most of the new calls unreviewed on 24 Oct. See [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
 
-`review_ready` means: the pins that existed moved, the checks that apply passed, and a **human still has to approve**. Open Patch does not merge.
+## How it works
 
-## Fight A/B (`/fight`)
+| Step | What happens | Code |
+| --- | --- | --- |
+| Intake | Public GitHub archive or ZIP. Nothing in the repo runs. Path traversal, symlinks, size and depth limits enforced. | `src/lib/repo/` |
+| Exposure | `affected`, `not_affected` or `unknown` from the pins that exist. Never a confident guess. | `src/lib/analysis/exposure.ts` |
+| Plan | Frozen Mubit task, compact user message, house rule PHP 8.2.35+. | `src/lib/llm/plan.ts`, `src/lib/llm/mubit.ts` |
+| Patch | Moves only pins that exist; composer.json is edited in place, so the diff stays small. | `src/lib/patches/` |
+| Checks | Allowlisted static checks. Missing pin = skipped, failed pin = `incomplete`. | `src/lib/checks/` |
+| Verify | Banyan Sapling scores policy + evidence + claim. `unsure` stays `uncertain`. | `src/lib/sapling/client.ts` |
 
-Same CVE, same `gpt-6-luna`, two routes:
-
-- **Left:** ChatGPT-shaped paste of app source only. Different system prompt. `store:false` so it cannot train plan 3.
-- **Right:** Frozen task + the four pins + house rule PHP 8.2.
-
-Each side gets its own `mreq_` id and a Sapling score. That is the before/after the demo can show **today**. It is not a trained adapter beating luna. See Adapter status below.
+Open Patch is not a scanner (Snyk, Sonar) and not a code editor (OpenHands, Aider). It sits between them: a finding goes in, a policy-checked, pin-only patch comes out.
 
 ## Setup
 
@@ -64,7 +65,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). `/fight` is the A/B. `/` then Harbor Ledger is the ZIP-or-fixture path.
+Open [http://localhost:3000](http://localhost:3000) and paste a public GitHub repo link. `/fight` is the same-model A/B. A ZIP upload and offline samples are under **More options**.
 
 ### Environment
 
@@ -90,9 +91,17 @@ npm run build
 
 ## Repositories you can test
 
-Harbor Ledger is a **synthetic fixture we wrote**. It is not a real company. Use it when you need a reliable PHP 7.4 pin.
+Paste any of these on the home page. All were run end to end on 24 Oct:
 
-For real public code, the app can fetch GitHub archives at scan time, or you can download the ZIP yourself and upload it:
+| Link | What you'll see |
+| --- | --- |
+| `https://github.com/sspangsberg/PHP-Calculator` | affected, PHP 7.4 → 8.2, Dockerfile + composer.json |
+| `https://github.com/ucan-lab/docker-laravel-alpine` | affected, `docker/php/Dockerfile` |
+| `https://github.com/r3dlin3/phpOIDC` | affected, Dockerfile + `phpOp/composer.json` |
+| `https://github.com/symfony/demo` | not affected (8.4.1), nothing to change |
+| `https://github.com/laravel/laravel/tree/v8.6.12` | unknown: `^7.3\|^8.0` could be either |
+
+Harbor Ledger is a **synthetic fixture we wrote** (not a real company) for a reliable offline PHP 7.4 case. You can also download a ZIP and upload it:
 
 - [laravel/laravel 12.x](https://github.com/laravel/laravel/archive/refs/heads/12.x.zip)
 - [laravel/laravel v8.6.12](https://github.com/laravel/laravel/archive/refs/tags/v8.6.12.zip)
@@ -100,15 +109,6 @@ For real public code, the app can fetch GitHub archives at scan time, or you can
 - [symfony/demo](https://github.com/symfony/demo/archive/refs/heads/main.zip)
 
 Exposure is computed from whatever is actually in the archive. A modern Laravel skeleton with `require.php: ^8.2` and no Docker pin is inferred as `not_affected` for the 7.4 EOL advisory, with that limitation stated. An older `^7.3|^8.0` constraint without a pin is `unknown`.
-
-## Demo (2–3 minutes)
-
-1. **Fight** (`/fight`) — same CVE, two plans, two `mreq_` IDs, dual Sapling. Left guessed 8.4 / violation. Right named 8.2 pins / supported. Unsure stays visible.
-2. Continue into Harbor Ledger Evidence. Four pins: Dockerfile `php:7.4-apache`, Composer `<8.0`, CI `7.4`, `.php-version` `7.4.33`.
-3. Plan — frozen task, live request ID.
-4. Patch — only those pins, house 8.2. Missing files skipped. Failed applicable checks block `review_ready`.
-5. Verify — Sapling often `unsure`. Leave it. Do not say php2shell is patched (PHP.net patched the engine on supported lines).
-6. Intelligence + Mubit console — plan 3, 660 calls, 44 kept, v1 Silent test 33.3%. Not Passed. Still luna.
 
 ## Adapter status (24 Oct 2026, 22:45 London — console is authority)
 
@@ -146,7 +146,9 @@ Response fields preserved as returned: `status`, `raw_label`, `probabilities`, `
 
 ## Known limitations
 
-- PHP first. Language packs exist for Node/Python pins. No GitHub import or pull request.
+- PHP first: pin patches target PHP 8.2 (8.2.35+). Node 16 and Python 3.8 advisories are checked; their pin rewrites are not demoed.
+- PHP 7.3 and older read as outside the 7.4 EOL advisory range today.
+- Public GitHub links and ZIP uploads only. We do not open the pull request for you; you apply the patch and push the branch.
 - Checks are allowlisted static parsers. Composer scripts, container builds, and repository CI are never executed.
 - Production OS/SAPI is not observed; Windows CGI stays `unknown`.
 - Sapling classifies supplied text. It is not a scanner or exploit proof.
