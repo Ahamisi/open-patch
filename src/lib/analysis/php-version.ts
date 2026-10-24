@@ -178,7 +178,72 @@ export function rewriteComposerPhpPins(
   }
 
   if (!changed) return null;
-  return `${JSON.stringify(parsed, null, 2)}\n`;
+  return editComposerInPlace(content, parsed) ?? `${JSON.stringify(parsed, null, 2)}\n`;
+}
+
+/**
+ * Change only the "php" string values in the original text so the diff a reviewer sees is
+ * one or two lines, not a re-indented file. Returns null when the in-place edit cannot
+ * reproduce `desired` exactly (for example, a key had to be added); the caller then falls
+ * back to re-serialising.
+ */
+function editComposerInPlace(
+  original: string,
+  desired: { require?: Record<string, string>; config?: { platform?: { php?: string } } },
+): string | null {
+  const pattern = /("php"\s*:\s*)"((?:[^"\\]|\\.)*)"/g;
+  const matches = [...original.matchAll(pattern)];
+  if (matches.length === 0) return insertRequirePhp(original, desired);
+  const marker = "__open_patch_marker__";
+  let result = "";
+  let cursor = 0;
+  for (const match of matches) {
+    const index = match.index ?? 0;
+    const probe = original.slice(0, index) + `${match[1]}"${marker}"` + original.slice(index + match[0].length);
+    let parsedProbe: { require?: { php?: string }; config?: { platform?: { php?: string } } };
+    try {
+      parsedProbe = JSON.parse(probe);
+    } catch {
+      return null;
+    }
+    let value: string | undefined;
+    if (parsedProbe.require?.php === marker) value = desired.require?.php;
+    else if (parsedProbe.config?.platform?.php === marker) value = desired.config?.platform?.php;
+    result += original.slice(cursor, index);
+    result += value === undefined ? match[0] : `${match[1]}${JSON.stringify(value)}`;
+    cursor = index + match[0].length;
+  }
+  result += original.slice(cursor);
+  try {
+    return JSON.stringify(JSON.parse(result)) === JSON.stringify(desired) ? result : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Add "php" as the first key of an existing "require" object, matching its indentation. */
+function insertRequirePhp(
+  original: string,
+  desired: { require?: Record<string, string> },
+): string | null {
+  const value = desired.require?.php;
+  if (value === undefined) return null;
+  const open = /"require"\s*:\s*\{/.exec(original);
+  if (!open) return null;
+  const at = open.index + open[0].length;
+  const rest = original.slice(at);
+  const nextLine = /^\s*?\n([ \t]*)\S/.exec(rest);
+  const isEmpty = /^\s*\}/.test(rest);
+  const entry = `"php": ${JSON.stringify(value)}`;
+  const insertion = nextLine
+    ? `\n${nextLine[1]}${entry}${isEmpty ? "" : ","}`
+    : ` ${entry}${isEmpty ? "" : ","}`;
+  const result = original.slice(0, at) + insertion + rest;
+  try {
+    return JSON.stringify(JSON.parse(result)) === JSON.stringify(desired) ? result : null;
+  } catch {
+    return null;
+  }
 }
 
 export function extractComposerPhpConstraint(content: string): string | null {

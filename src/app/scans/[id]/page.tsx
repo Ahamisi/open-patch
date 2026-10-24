@@ -3,9 +3,17 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { StatusBadge } from "@/components/StatusBadge";
+import { diffHunks } from "@/lib/patches/unified";
 import type { Correction, PublicScan } from "@/lib/types";
 
 const STEPS = ["Evidence", "Plan", "Patch", "Verify", "Learning"] as const;
+const STEP_LABELS: Record<(typeof STEPS)[number], string> = {
+  Evidence: "What we found",
+  Plan: "Mubit plan",
+  Patch: "Changes",
+  Verify: "Verification",
+  Learning: "Mubit log",
+};
 
 export default function ScanPage() {
   return (
@@ -45,7 +53,7 @@ function ScanWorkspace() {
         if (data.error) throw new Error(data.error);
         setScan(data.scan);
         setCorrections(data.corrections ?? []);
-        if (converted || (fromDemo && data.scan?.patch)) setStep("Patch");
+        if ((converted || fromDemo) && data.scan?.patch?.hunks?.length) setStep("Patch");
       })
       .catch((err) => {
         if (!cancelled) setError(err.message);
@@ -93,45 +101,16 @@ function ScanWorkspace() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-ember">{scan.repoLabel}</p>
-          <h1 className="mt-1 text-3xl font-semibold">{scan.name}</h1>
-          <p className="mt-2 text-sm text-mist-300">{scan.advisory.title}</p>
+          <p className="text-xs uppercase tracking-[0.22em] text-mist-500">{scan.advisory.title}</p>
+          <h1 className="mt-1 text-3xl font-semibold">{scan.repoLabel}</h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <StatusBadge value={scan.exposure.status} />
-          <StatusBadge value={scan.advisoryEcosystem} />
-          <StatusBadge value={scan.advisory.kind} />
-          <StatusBadge value={scan.readiness.status} />
-          {scan.planSource ? <StatusBadge value={scan.planSource === "mubit" ? "mubit" : "mock"} /> : null}
-          {scan.policyVersion ? <StatusBadge value={scan.policyVersion} /> : null}
+          {scan.readiness.status !== "no_change" ? <StatusBadge value={scan.readiness.status} /> : null}
         </div>
       </div>
 
-      <article className="panel px-5 py-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="text-xs uppercase tracking-[0.18em] text-ember">Remediation status</p>
-          <StatusBadge value={scan.readiness.status} />
-        </div>
-        <p className="mt-2 text-sm text-mist-300">{scan.readiness.reason}</p>
-        {scan.readiness.pinsMoved.length > 0 ? (
-          <p className="mt-2 font-mono text-xs text-mist-500">
-            pins moved: {scan.readiness.pinsMoved.join(", ")}
-          </p>
-        ) : null}
-        {scan.readiness.skipped.length > 0 ? (
-          <p className="mt-1 font-mono text-xs text-mist-500">
-            skipped: {scan.readiness.skipped.join(", ")}
-          </p>
-        ) : null}
-        {scan.ecosystems.length > 0 ? (
-          <p className="mt-1 font-mono text-xs text-mist-500">
-            languages in archive: {scan.ecosystems.join(", ")}
-          </p>
-        ) : null}
-        <p className="mt-2 text-xs text-mist-500">
-          Review-ready is not merged. A human still has to approve.
-        </p>
-      </article>
+      <ResultCard scan={scan} />
 
       <div className="flex flex-wrap gap-2">
         {STEPS.map((item) => (
@@ -142,28 +121,17 @@ function ScanWorkspace() {
               step === item ? "bg-ember text-ink-950" : "border border-ink-600 text-mist-300"
             }`}
           >
-            {item}
+            {STEP_LABELS[item]}
           </button>
         ))}
       </div>
 
-      {converted ? (
+      {fromDemo ? (
         <div className="panel px-5 py-4 text-sm text-mist-300">
-          <p className="text-xs uppercase tracking-[0.18em] text-ember">
-            Team ZIP converted — pins, not app source
-          </p>
+          <p className="text-xs uppercase tracking-[0.18em] text-ember">Sample run</p>
           <p className="mt-1">
-            They dropped the archive. We planned on the frozen task, moved only locks that exist,
-            ran checks, and scored the claim. Walk the hunks. Invoice.php (or equivalent) is not
-            in the diff. A human still merges.
-          </p>
-        </div>
-      ) : fromDemo ? (
-        <div className="panel px-5 py-4 text-sm text-mist-300">
-          <p className="text-xs uppercase tracking-[0.18em] text-ember">Live demo is already run</p>
-          <p className="mt-1">
-            Walk Evidence → Plan → Patch → Verify → Learning. The Mubit request ID and the Sapling
-            unsure verdict are real. Then mark the plan incorrect: runtime upgrade, not a PHP edit.
+            Harbor Ledger is a small sample app we wrote, pinned to PHP 7.4. The Mubit request ID
+            and the Sapling verdict below are live.
           </p>
         </div>
       ) : null}
@@ -289,7 +257,10 @@ function ScanWorkspace() {
               <article className="panel p-6">
                 <h2 className="text-lg font-medium">{scan.patch.prTitle}</h2>
                 <p className="mt-2 text-sm text-mist-300">{scan.patch.summary}</p>
-                <pre className="mt-4 whitespace-pre-wrap text-xs text-mist-300">{scan.patch.prBody}</pre>
+                <details className="mt-4">
+                  <summary className="cursor-pointer text-xs text-mist-500">Pull request description</summary>
+                  <pre className="mt-2 whitespace-pre-wrap text-xs text-mist-300">{scan.patch.prBody}</pre>
+                </details>
               </article>
               {scan.patch.hunks.map((hunk) => (
                 <article key={hunk.path} className="panel overflow-hidden">
@@ -298,14 +269,20 @@ function ScanWorkspace() {
                     <p className="text-xs text-mist-500">{hunk.reason}</p>
                   </div>
                   <pre className="overflow-auto p-4 font-mono text-[12px] leading-6">
-                    {hunk.before.split("\n").map((line, index) => (
-                      <div key={`d${index}`} className="diff-del">
-                        -{line}
-                      </div>
-                    ))}
-                    {hunk.after.split("\n").map((line, index) => (
-                      <div key={`a${index}`} className="diff-add">
-                        +{line}
+                    {diffHunks(hunk.before, hunk.after).flat().map((line, index) => (
+                      <div
+                        key={index}
+                        className={
+                          line.kind === "-"
+                            ? "diff-del"
+                            : line.kind === "+"
+                              ? "diff-add"
+                              : line.kind === "@"
+                                ? "text-mist-500"
+                                : "text-mist-300"
+                        }
+                      >
+                        {line.kind === "@" ? line.text : `${line.kind}${line.text}`}
                       </div>
                     ))}
                   </pre>
@@ -385,10 +362,10 @@ function ScanWorkspace() {
             )}
           </article>
           <article className="panel p-6">
-            <h2 className="text-lg font-medium">Human correction</h2>
+            <h2 className="text-lg font-medium">Was this plan right?</h2>
             <p className="mt-2 text-sm text-mist-300">
-              Corrections are stored with the original output, policy version, evidence IDs, and
-              Mubit run ID. They do not instantly train an adapter.
+              Your correction is saved with the plan&apos;s Mubit request ID and sent back to the same
+              Mubit task as a new example. It doesn&apos;t change the model instantly.
             </p>
             <select
               className="mt-4 w-full rounded-xl border border-ink-600 bg-ink-950 px-3 py-2 text-sm"
@@ -441,8 +418,8 @@ function ScanWorkspace() {
         <section className="panel p-6">
           <h2 className="text-lg font-medium">Mubit task trail</h2>
           <p className="mt-2 text-sm text-mist-300">
-            Recurring task <span className="font-mono text-ember">advisory_to_migration_plan</span>.
-            Adapter status is not inferred. Open the Mubit console for kept-example counts.
+            Every Mubit call this check made. Calls marked &quot;yes&quot; are recorded as examples of our
+            Mubit task; the Mubit console is the authority on what gets kept for training.
           </p>
           <div className="mt-4 overflow-auto">
             <table className="w-full text-left text-xs">
@@ -471,5 +448,139 @@ function ScanWorkspace() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+
+function slugOf(label: string): string {
+  return (
+    label
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60) || "repo"
+  );
+}
+
+function CopyButton({ text, label }: { text: string; label: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="rounded-full border border-ink-600 px-4 py-2 text-sm hover:border-ember/50"
+      onClick={() => {
+        void navigator.clipboard?.writeText(text).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        });
+      }}
+    >
+      {copied ? "Copied" : label}
+    </button>
+  );
+}
+
+function ResultCard({ scan }: { scan: PublicScan }) {
+  const planCall = scan.mubitCalls.find((call) => call.purpose === "plan" && !call.mock && call.requestId);
+  const hunks = scan.patch?.hunks ?? [];
+  const target = scan.patch?.prTitle.match(/to PHP ([\d.]+)/i)?.[1] ?? null;
+  const detected = scan.exposure.detectedVersion;
+  const files = hunks.map((hunk) => hunk.path);
+  const github = scan.repoSource === "public_github" && /^[^/\s]+\/[^/\s@]+/.test(scan.repoLabel)
+    ? scan.repoLabel.split("@")[0]
+    : null;
+  const branch = `open-patch/php-${target ?? "upgrade"}`;
+  const patchFile = `open-patch-${slugOf(scan.repoLabel)}.patch`;
+  const commands = [
+    `git checkout -b ${branch}`,
+    `git apply ~/Downloads/${patchFile}`,
+    `git commit -am "${(scan.patch?.prTitle ?? "Upgrade PHP runtime pins").replace(/"/g, "'")}"`,
+    `git push -u origin ${branch}`,
+  ].join("\n");
+
+  let title: string;
+  let body: string;
+  if (hunks.length > 0 && scan.readiness.status === "review_ready") {
+    title = `PHP ${detected ?? "version"} → ${target ?? "a supported release"}. ${hunks.length} file${hunks.length === 1 ? "" : "s"} to change.`;
+    body = `We found the version in ${files.join(", ")}. The patch changes only ${hunks.length === 1 ? "that file" : "those files"}, and the checks that apply passed. Your application code is untouched. Review it and merge when you're ready.`;
+  } else if (hunks.length > 0) {
+    title = `PHP ${detected ?? "version"} is affected. The patch needs a closer look.`;
+    body = scan.readiness.reason;
+  } else if (scan.exposure.status === "not_affected") {
+    title = "Nothing to change.";
+    body = scan.exposure.reason;
+  } else if (scan.exposure.status === "affected") {
+    title = "Affected, but there's no pin we can safely change.";
+    body = `${scan.exposure.reason} ${scan.readiness.reason}`;
+  } else {
+    title = "We can't tell which PHP version this runs.";
+    body = scan.exposure.reason;
+  }
+  const missing = scan.exposure.status === "unknown" ? (scan.plan?.missingInformation ?? []).slice(0, 3) : [];
+  const sapling = scan.verification?.saplingVerdict ?? null;
+
+  return (
+    <article className="panel space-y-4 p-6">
+      <div>
+        <h2 className="text-2xl font-semibold leading-snug">{title}</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-mist-300">{body}</p>
+        {missing.length > 0 ? (
+          <ul className="mt-3 space-y-1 text-sm text-mist-300">
+            {missing.map((item) => (
+              <li key={item}>· {item}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+
+      <div className="flex flex-wrap gap-x-6 gap-y-2 border-t border-ink-600 pt-4 text-xs text-mist-500">
+        {planCall ? (
+          <span>
+            Plan by <span className="text-ember">Mubit</span> ·{" "}
+            <span className="font-mono">{planCall.requestId}</span> · {(planCall.latencyMs / 1000).toFixed(1)} s
+          </span>
+        ) : scan.planSource === "mock" ? (
+          <span className="text-signal-unknown">Mubit was unreachable, so this plan is our built-in fallback.</span>
+        ) : null}
+        {sapling ? (
+          <span>
+            Independent check (Banyan Sapling): <span className="text-mist-300">{sapling}</span>
+            {sapling === "unsure" ? " — shown as is, not rounded up" : ""}
+          </span>
+        ) : null}
+        <span>A person reviews and merges. We never push to your repository.</span>
+      </div>
+
+      {hunks.length > 0 ? (
+        <div className="space-y-3 border-t border-ink-600 pt-4">
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={`/api/scans/${scan.id}/download`}
+              className="rounded-full bg-ember px-5 py-2 text-sm font-semibold text-ink-950"
+            >
+              Download patch
+            </a>
+            <CopyButton text={commands} label="Copy branch commands" />
+            {scan.patch ? <CopyButton text={scan.patch.prBody} label="Copy PR description" /> : null}
+          </div>
+          <pre className="overflow-auto rounded-xl border border-ink-600 bg-ink-950 p-4 font-mono text-xs leading-6 text-mist-300">
+            {commands}
+          </pre>
+          {github ? (
+            <p className="text-xs text-mist-500">
+              Then open the pull request:{" "}
+              <a
+                className="text-ember underline"
+                href={`https://github.com/${github}/compare/${branch}?expand=1`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                github.com/{github}/compare/{branch}
+              </a>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </article>
   );
 }

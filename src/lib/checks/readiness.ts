@@ -49,7 +49,7 @@ export function assessRemediationReadiness(
     return {
       status: "no_change",
       reason:
-        "Affected, but no rewriteable runtime pin was found. PatchPilot will not invent a source edit.",
+        "Affected, but no rewriteable runtime pin was found. Open Patch will not invent a source edit.",
       applicableFailed,
       skipped,
       pinsMoved,
@@ -84,7 +84,7 @@ export function assessRemediationReadiness(
 
   return {
     status: "review_ready",
-    reason: `${pinsMoved.length} runtime pin${pinsMoved.length === 1 ? "" : "s"} moved to PHP 8.2 and the checks that apply passed. A human still has to approve. PatchPilot does not merge.`,
+    reason: `${pinsMoved.length} runtime pin${pinsMoved.length === 1 ? "" : "s"} moved to PHP 8.2 and the checks that apply passed. A human still has to approve. Open Patch does not merge.`,
     applicableFailed,
     skipped,
     pinsMoved,
