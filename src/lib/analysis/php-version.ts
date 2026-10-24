@@ -135,7 +135,7 @@ export function rewriteCiPhpVersion(content: string, targetMinor = "8.2"): strin
   );
 }
 
-export function rewritePhpVersionFile(content: string, target = "8.2.26"): string | null {
+export function rewritePhpVersionFile(content: string, target = "8.2.35"): string | null {
   const current = content.trim();
   if (!/^7\.4(?:\.\d+)?$/.test(current)) return null;
   return `${target}\n`;
@@ -157,7 +157,7 @@ export function rewriteComposerPhpPins(
   if (!parsed || typeof parsed !== "object") return null;
 
   const targetConstraint = options.targetConstraint ?? ">=8.2 <8.4";
-  const targetPlatform = options.targetPlatform ?? "8.2.26";
+  const targetPlatform = options.targetPlatform ?? "8.2.35";
   let changed = false;
 
   if (typeof parsed.require?.php === "string") {

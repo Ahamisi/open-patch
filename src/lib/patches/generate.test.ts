@@ -163,7 +163,7 @@ describe("generateProposedPatch", () => {
     expect(scan.patch.hunks[0]?.after).toContain("FROM php:8.2-fpm-alpine");
     const composerAfter = scan.patch.hunks.find((hunk) => hunk.path.endsWith("composer.json"))?.after ?? "";
     expect(composerAfter).toContain(">=8.2 <8.4");
-    expect(composerAfter).toContain("8.2.26");
+    expect(composerAfter).toContain("8.2.35");
     scan.checks = runAllowlistedChecks(scan);
     expect(assessRemediationReadiness(scan).status).toBe("review_ready");
   });
