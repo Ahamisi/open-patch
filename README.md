@@ -6,6 +6,17 @@ Built for Mubit [Night Shift](https://luma.com/nightshift-london), London, 24–
 
 **Try it live: [open-patch.onrender.com](https://open-patch.onrender.com)**. Paste any public GitHub repo; each check is a live Mubit call. Free hosting, so the first visit after a quiet spell can take about 50 s to wake up. **Demo video:** [`docs/open-patch-demo.mp4`](docs/open-patch-demo.mp4) (1:58).
 
+## Why Mubit: repo eighty shouldn't cost a frontier call
+
+A large team doesn't patch one repo. It runs the same migration (an engine CVE, an EOL runtime, a base-image bump) across dozens or hundreds of repos, and every repo through a frontier model is a full-price call that has forgotten last week's corrections. Open Patch sends every check through one frozen Mubit task instead:
+
+1. **Every call is a training example.** The frontier model (`gpt-6-luna`) answers through Mubit, and Mubit's reviewer keeps the good answers as examples of that one task.
+2. **Mubit trains a small specialist.** Once a task has enough kept examples, Mubit trains a 4B adapter (Qwen3-4B) on them and tests it against the frontier model's answers on held-out cases.
+3. **Corrections retrain it.** When a reviewer fixes a plan, the correction goes back to the same task as a new example, and the next version learns the team's own rules.
+4. **The cheap model takes over when it's good enough.** Mubit runs the adapter in silent test, then canary, then promoted. Only once it matches the frontier model on the team's task do later repos stop paying frontier prices for an answer the team has already taught it.
+
+Tonight that loop really ran: over 1,000 calls across three tasks, and Mubit trained the pin-decision adapter overnight to **56.7%** on 30 test cases (plan 3's first adapter: 33.3%). Neither is at the 95% bar yet, so both are still shadowing and luna answers every call. Details under [Adapter status](#adapter-status-console-is-the-authority).
+
 ## Who it's for
 
 Anyone who owns more code than they can read when an engine-level advisory lands:
