@@ -162,7 +162,7 @@ Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`
 | Answered by adapter | 0.0% |
 | Served by | `gpt-6-luna` |
 
-Silent test is **not** Passed. Open Patch still calls luna. A correction is stored as an example; it does not flip the served model. We will not claim a live trained version until the console says Passed and traffic is on that version. If that happens before the film, re-run Fight and show the same Sapling task answering better. Until then the A/B is same-model, two routes. Why 95% is not reachable tonight: [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
+Silent test is **not** Passed. Open Patch still calls luna. A correction is stored as an example; it does not flip the served model. We will not claim a live trained version until the console says Passed and traffic is on that version. The Fight A/B is the same model on two routes, not adapter against provider. Why 95% is not reachable tonight: [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
 
 ### Second task: pin decision (trained overnight, 25 Oct 2026)
 
