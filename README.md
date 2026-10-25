@@ -168,11 +168,15 @@ Plan 3 asks a 4B adapter to reproduce long free-text plans, and v1 matches about
 | Fact | Pin-decision task (console, 04:30 London) | Plan 3, for comparison |
 | --- | --- | --- |
 | Adapter | Qwen3-4B-Instruct-2507, v1, **Silent test 10%** | Qwen3-4B-Instruct-2507, v1, Silent test 10% |
-| Exam | **56.7%** of the provider's answers matched on **30** test cases; needs 95% | 33.3% on 12 test cases; needs 95% |
+| Exam | **56.7%** of the provider's answers matched on **30** test cases (base model + same prompt: 50.0%); needs 95% | 33.3% on 12 test cases (base model + prompt: 8.3%); needs 95% |
 | Deployment history | "Step by the engine · v1: candidate → shadow · 10%" | same |
 | Served by | `gpt-6-luna` (adapter is shadowing) | `gpt-6-luna` |
 
-Same model size, same night: making the task narrower and sending more varied traffic took the adapter from 33.3% to 56.7%, on a larger exam. It is still below the 95% bar, so Mubit keeps it in silent test and luna answers every call. More traffic on this task is the path to v2. Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority.
+Same model size, same night: making the task narrower took the adapter from 33.3% to 56.7%, on a larger exam. Most of that gain is the task design (the base model with the same prompt already scores 50.0%); training added about 7 points.
+
+**Why it still fails rows, from the console's Evaluations tab:** held-out row 2 has the same exposure (`unknown`), the same `detectedVersion` (`null`) and the same empty `changes` as the provider, and fails only because the one-line `reason` is worded differently ("The PHP version is not pinned in the evidence." vs "The available evidence does not pin a PHP version."). So at 04:45 we opened a third, fresh task, **pin list** (`PIN_V2_SYSTEM_PROMPT`, `task: "v2"`): no free text, every affected pin listed in a fixed order, so the provider's answer is fully determined by the evidence. Tested on PHP-Calculator (all three pins), docker-laravel-alpine (one) and symfony/demo (not affected, none). Feed it with `node scripts/fleet-pins.mjs 1000 v2`.
+
+In Try models, the v1 adapter answered a PHP-Calculator pin input in 1.3 s in the task's exact JSON shape with the right exposure, but listed no pins. That is the kind of miss the next version has to fix. It is still below the 95% bar, so Mubit keeps it in silent test and luna answers every call. More traffic on this task is the path to v2. Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority.
 
 ## Mubit task design
 
