@@ -4,7 +4,7 @@ import { loadAdvisory } from "@/lib/advisories/catalog";
 import { assessExposure } from "@/lib/analysis/exposure";
 import { mubitConfigured } from "@/lib/config";
 import { callMubitTaskRaw } from "@/lib/llm/mubit";
-import { buildPinUserMessage, PIN_SYSTEM_PROMPT } from "@/lib/llm/pin-task";
+import { buildPinUserMessage, PIN_SYSTEM_PROMPT, PIN_V2_SYSTEM_PROMPT } from "@/lib/llm/pin-task";
 import { downloadPublicZip } from "@/lib/repo/fetch-zip";
 import { parseGithubRepoUrl } from "@/lib/repo/github-url";
 import { missingEvidence } from "@/lib/repo/missing";
@@ -19,7 +19,8 @@ export async function POST(request: Request) {
   if (!mubitConfigured()) {
     return Response.json({ error: "MUBIT_API_KEY is not configured." }, { status: 400 });
   }
-  const body = (await request.json().catch(() => ({}))) as { githubUrl?: string; advisoryId?: string };
+  const body = (await request.json().catch(() => ({}))) as { githubUrl?: string; advisoryId?: string; task?: string };
+  const v2 = body.task === "v2";
   const ref = parseGithubRepoUrl(body.githubUrl ?? "");
   if (!ref) return Response.json({ error: "Paste a public GitHub repository link." }, { status: 400 });
 
@@ -29,15 +30,15 @@ export async function POST(request: Request) {
     const inventory = inventoryFromZip(await downloadPublicZip(ref.zipUrl), `github:${ref.label}`);
     const evidence = [...inventory.evidence, ...missingEvidence(new Date().toISOString())];
     const exposure = assessExposure(advisory, inventory.files, evidence);
-    const sessionId = `pins-${crypto.randomUUID()}`;
+    const sessionId = `${v2 ? "pinlist" : "pins"}-${crypto.randomUUID()}`;
     const userContent = buildPinUserMessage({ advisory, exposure, evidence });
     const result = await callMubitTaskRaw({
       purpose: "plan",
       userContent,
       recordForTraining: true,
       sessionId,
-      systemPrompt: PIN_SYSTEM_PROMPT,
-      taskName: "pin_decision",
+      systemPrompt: v2 ? PIN_V2_SYSTEM_PROMPT : PIN_SYSTEM_PROMPT,
+      taskName: v2 ? "pin_list" : "pin_decision",
     });
     let parsed: { changes?: unknown[] } | null = null;
     try {
@@ -48,6 +49,7 @@ export async function POST(request: Request) {
     const row = {
       at: new Date().toISOString(),
       repo: ref.label,
+      task: v2 ? "pin_list" : "pin_decision",
       advisory: advisory.id,
       exposure: exposure.status,
       requestId: result.record.requestId,

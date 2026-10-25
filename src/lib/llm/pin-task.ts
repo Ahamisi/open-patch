@@ -22,6 +22,25 @@ export const PIN_SYSTEM_PROMPT = [
   "- reason is one sentence of at most 20 words.",
 ].join(" ");
 
+/**
+ * Third Mubit task (opened 25 Oct, 04:45 London): the same decision with no free text.
+ * The v1 adapter lost most of its exam on the one-sentence "reason" and on which pins it chose
+ * to list. This prompt removes the sentence and fixes the list and its order, so the provider's
+ * answer is a pure function of the evidence. A separate prompt means a separate, fresh task.
+ */
+export const PIN_V2_SYSTEM_PROMPT = [
+  "You are Open Patch's pin-list task.",
+  "Read the JSON in the user message: advisory, exposure, houseRule and pin evidence.",
+  'Return only JSON: {"exposure":"affected|not_affected|unknown","detectedVersion":string|null,"changes":[{"file":string,"from":string,"to":string}]}.',
+  "Rules:",
+  "- Copy exposure.status and exposure.detectedVersion from the user message exactly.",
+  "- When exposure is affected, list every pin in the evidence that names an affected version: Docker FROM image tag, composer platform php, composer require php, .php-version, CI php-version, .nvmrc, engines.node, runtime.txt, .python-version, requires-python.",
+  "- from is the exact pin text in the excerpt. to is the houseRule value for that pin.",
+  "- Order changes by evidence order in the user message.",
+  "- changes is empty when exposure is not_affected or unknown.",
+  "- Never list application source files. No other keys, no prose.",
+].join(" ");
+
 const HOUSE_RULE: Record<string, string> = {
   php: 'PHP: Docker image keeps its variant on 8.2 (php:7.4-apache -> php:8.2-apache, php:7.4-fpm-alpine -> php:8.2-fpm-alpine); composer require "php": ">=8.2 <8.4"; composer platform "php": "8.2.35"; .php-version 8.2.35; CI php-version 8.2.',
   node: "Node: Docker image keeps its variant on 20 (node:16-alpine -> node:20-alpine); engines.node >=20; .nvmrc 20.",
