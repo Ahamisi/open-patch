@@ -64,7 +64,7 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 | 0:59–1:11 | **The referee.** Banyan Sapling scores the plain route a violation (45.4%) and Open Patch supported (56.0%). Both are calibrated `unsure`, and we leave that on screen. |
 | 1:11–1:20 | **The patch.** Four pins move; application source doesn't. |
 | 1:20–1:30 | **A real repo, end to end.** Paste PHP-Calculator, Mubit plans it, the verdict shows "7.4 → 8.2, two files" with its Mubit request ID, and the three-line diff applies with `git apply`. Real app screenshots from a live run. |
-| 1:30–1:42 | **The Mubit console.** One frozen task: 660 calls, 44 kept, adapter v1 on Silent test at 33.3% of a 95% target, and the new pin-decision task (404 calls, in review) that is built to train faster. |
+| 1:30–1:42 | **The Mubit console.** Plan 3: 660 calls, 44 kept, adapter v1 at 33.3%. Then the Adapters page at 04:30: the new pin-decision task's v1, trained overnight, at 56.7% on 30 test cases (target 95%, Silent test). |
 | 1:42–1:52 | **Where it goes next.** PHP is this week's fire; tomorrow it's Node, Python, a leftover OpenSSL, an abandoned npm lock. Same loop: review, migrate, patch, against the rules a team already wrote. |
 | 1:52–1:58 | **End card.** PHP tonight, every pin tomorrow. github.com/Ahamisi/open-patch |
 
@@ -145,7 +145,9 @@ Harbor Ledger is a **synthetic fixture we wrote** (not a real company) for a rel
 
 Exposure is computed from whatever is actually in the archive. A modern Laravel skeleton with `require.php: ^8.2` and no Docker pin is inferred as `not_affected` for the 7.4 EOL advisory, with that limitation stated. An older `^7.3|^8.0` constraint without a pin is `unknown`.
 
-## Adapter status (24 Oct 2026, 22:45 London — console is authority)
+## Adapter status (console is the authority)
+
+**Plan 3** (24 Oct, 22:45 London):
 
 Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`).
 
@@ -159,18 +161,18 @@ Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`
 
 Silent test is **not** Passed. Open Patch still calls luna. A correction is stored as an example; it does not flip the served model. We will not claim a live trained version until the console says Passed and traffic is on that version. If that happens before the film, re-run Fight and show the same Sapling task answering better. Until then the A/B is same-model, two routes. Why 95% is not reachable tonight: [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
 
-### Second task: pin decision (started 25 Oct 2026, 00:55 London)
+### Second task: pin decision (trained overnight, 25 Oct 2026)
 
-Plan 3 asks a 4B adapter to reproduce long free-text plans, and v1 matches about a third of them. So we opened a second, narrower Mubit task with its own frozen prompt, `PIN_SYSTEM_PROMPT` in [`src/lib/llm/pin-task.ts`](src/lib/llm/pin-task.ts). It returns short JSON: exposure, detected version, the exact pin lines to change, and a one-line reason. Example from a real call on `sspangsberg/PHP-Calculator`: `dockerfile php:7.4-fpm-alpine → php:8.2-fpm-alpine`, `composer.json 7.4.0 → 8.2.35`.
+Plan 3 asks a 4B adapter to reproduce long free-text plans, and v1 matches about a third of them. So at 00:55 we opened a second, narrower Mubit task with its own frozen prompt, `PIN_SYSTEM_PROMPT` in [`src/lib/llm/pin-task.ts`](src/lib/llm/pin-task.ts). It returns short JSON: exposure, detected version, the exact pin lines to change, and a one-line reason. Example from a real call on `sspangsberg/PHP-Calculator`: `dockerfile php:7.4-fpm-alpine → php:8.2-fpm-alpine`, `composer.json 7.4.0 → 8.2.35`. We fed it about 400 public repos; Mubit's reviewer kept the examples and the engine trained v1 within about three hours.
 
-| Fact | Value (console, 00:57 London) |
-| --- | --- |
-| Task | `Open Patch's pin-decision task`: Reviewing examples |
-| Calls / kept | 404 / 0 so far (reviewer has not judged the batch yet) |
-| Training | starts at 25 kept; not started |
-| Served by | `gpt-6-luna` |
+| Fact | Pin-decision task (console, 04:30 London) | Plan 3, for comparison |
+| --- | --- | --- |
+| Adapter | Qwen3-4B-Instruct-2507, v1, **Silent test 10%** | Qwen3-4B-Instruct-2507, v1, Silent test 10% |
+| Exam | **56.7%** of the provider's answers matched on **30** test cases; needs 95% | 33.3% on 12 test cases; needs 95% |
+| Deployment history | "Step by the engine · v1: candidate → shadow · 10%" | same |
+| Served by | `gpt-6-luna` (adapter is shadowing) | `gpt-6-luna` |
 
-Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority; nothing in Open Patch is served by either adapter tonight.
+Same model size, same night: making the task narrower and sending more varied traffic took the adapter from 33.3% to 56.7%, on a larger exam. It is still below the 95% bar, so Mubit keeps it in silent test and luna answers every call. More traffic on this task is the path to v2. Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority.
 
 ## Mubit task design
 
