@@ -4,6 +4,8 @@
 
 Built for Mubit [Night Shift](https://luma.com/nightshift-london), London, 24–25 Oct 2026.
 
+**Try it live: [open-patch.onrender.com](https://open-patch.onrender.com)**. Paste any public GitHub repo; each check is a live Mubit call. Free hosting, so the first visit after a quiet spell can take about 50 s to wake up. **Demo video:** [`docs/open-patch-demo.mp4`](docs/open-patch-demo.mp4) (1:58).
+
 ## Who it's for
 
 Anyone who owns more code than they can read when an engine-level advisory lands:
@@ -31,7 +33,7 @@ Anyone who owns more code than they can read when an engine-level advisory lands
 
 ## Try it
 
-1. Paste a public GitHub link on the home page, for example `https://github.com/sspangsberg/PHP-Calculator`, and click **Check my repo**.
+1. Open [open-patch.onrender.com](https://open-patch.onrender.com) (or run it locally, see Setup), paste a public GitHub link, for example `https://github.com/sspangsberg/PHP-Calculator`, and click **Check my repo**.
 2. In 15–40 s you get the verdict: **"PHP 7.4 → 8.2. 2 files to change."**, the Mubit request ID for the plan, and Banyan Sapling's verdict shown as returned (`unsure` stays `unsure`).
 3. **Download patch** gives a `git apply`-ready file. **Copy branch commands** gives `git checkout -b open-patch/php-8.2 && git apply … && git commit && git push`, plus the GitHub compare link to open the PR.
 
