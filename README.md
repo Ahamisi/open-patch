@@ -154,6 +154,19 @@ Task: `PatchPilot's advisory-to-migration-plan 3` (`ln_7b8e75ee6161e8c0ec917e8d`
 
 Silent test is **not** Passed. Open Patch still calls luna. A correction is stored as an example; it does not flip the served model. We will not claim a live trained version until the console says Passed and traffic is on that version. If that happens before the film, re-run Fight and show the same Sapling task answering better. Until then the A/B is same-model, two routes. Why 95% is not reachable tonight: [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
 
+### Second task: pin decision (started 25 Oct 2026, 00:55 London)
+
+Plan 3 asks a 4B adapter to reproduce long free-text plans, and v1 matches about a third of them. So we opened a second, narrower Mubit task with its own frozen prompt, `PIN_SYSTEM_PROMPT` in [`src/lib/llm/pin-task.ts`](src/lib/llm/pin-task.ts). It returns short JSON: exposure, detected version, the exact pin lines to change, and a one-line reason. Example from a real call on `sspangsberg/PHP-Calculator`: `dockerfile php:7.4-fpm-alpine → php:8.2-fpm-alpine`, `composer.json 7.4.0 → 8.2.35`.
+
+| Fact | Value (console, 00:57 London) |
+| --- | --- |
+| Task | `Open Patch's pin-decision task`: Reviewing examples |
+| Calls / kept | 404 / 0 so far (reviewer has not judged the batch yet) |
+| Training | starts at 25 kept; not started |
+| Served by | `gpt-6-luna` |
+
+Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority; nothing in Open Patch is served by either adapter tonight.
+
 ## Mubit task design
 
 - Stable system prompt: `You are PatchPilot's advisory-to-migration-plan task.`
