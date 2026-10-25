@@ -6,6 +6,10 @@ Built for Mubit [Night Shift](https://luma.com/nightshift-london), London, 24–
 
 **Try it live: [open-patch.onrender.com](https://open-patch.onrender.com)**. Paste any public GitHub repo; each check is a live Mubit call. Free hosting, so the first visit after a quiet spell can take about 50 s to wake up. **Demo video:** [`docs/open-patch-demo.mp4`](docs/open-patch-demo.mp4) (1:58).
 
+## Why it matters
+
+An unpatched runtime isn't an abstract risk: it's where people's money and records sit. In 2017, Equifax left a known, already-fixed flaw in a framework unpatched, and the personal data of about 147 million people was exposed. php2shell is the same shape: unauthenticated remote code execution in the PHP engine, which runs a large share of the web, including payment pages, savings and lending apps, school and clinic portals, and small businesses' shops. The fix already exists on supported PHP lines. What's missing is the time to find every repo still pinned to an old runtime and move it, safely, before someone else finds it first. Open Patch turns that into minutes per repo, and Mubit makes each repo cheaper than the last.
+
 ## Why Mubit: repo eighty shouldn't cost a frontier call
 
 A large team doesn't patch one repo. It runs the same migration (an engine CVE, an EOL runtime, a base-image bump) across dozens or hundreds of repos, and every repo through a frontier model is a full-price call that has forgotten last week's corrections. Open Patch sends every check through one frozen Mubit task instead:
