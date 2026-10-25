@@ -50,18 +50,21 @@ For PHP-Calculator the whole patch is three lines:
 
 It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo doesn't pin its version, the answer is **unknown** and the plan says what's missing; it doesn't guess.
 
-## What the demo video shows (2:00)
+## What the demo video shows (1:58)
+
+**Watch it:** [`docs/open-patch-demo.mp4`](docs/open-patch-demo.mp4) (1:58, 1080p, 54 MB; GitHub shows "View raw" to play or download).
 
 | Time | What you see |
 | --- | --- |
 | 0:00–0:26 | **The problem.** php2shell (CVE-2026-109618 / 109619, 21 Oct 2026): unauthenticated RCE in PHP itself, fixed only on 8.2.35, 8.3.36, 8.4.27 and 8.5.12; 8.1 and older are out of support. |
-| 0:26–0:41 | **The wrong fix.** A chatbot rewrites the app code and says it's fixed; the Dockerfile still says `php:7.4-apache`. |
-| 0:41–1:00 | **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins; the Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule. |
-| 1:00–1:12 | **The referee.** Banyan Sapling scores the plain route a violation (45.4%) and Open Patch supported (56.0%). Both are calibrated `unsure`, and we leave that on screen. |
-| 1:12–1:21 | **The patch.** Four pins move; application source doesn't. |
-| 1:21–1:31 | **A real repo, end to end.** Paste PHP-Calculator, Mubit plans it, the verdict shows "7.4 → 8.2, two files" with its Mubit request ID, and the three-line diff applies with `git apply`. Real app screenshots from a live run. |
-| 1:31–1:51 | **The Mubit console, as it is.** One frozen task; adapter v1 on Silent test at 33.3% of a 95% target. Not Passed, and we say so. The band shows the 22:45 numbers: 660 calls, 44 kept. |
-| 1:51–1:58 | **End card.** github.com/Ahamisi/open-patch |
+| 0:26–0:40 | **The wrong fix.** A chatbot rewrites the app code and says it's fixed; the Dockerfile still says `php:7.4-apache`. |
+| 0:40–0:59 | **Fight (`/fight`).** Same `gpt-6-luna` through Mubit, two routes, two real `mreq_` IDs. The plain prompt guessed 8.4 and named no pins; the Open Patch task named Dockerfile, Composer, CI and `.php-version` under the house rule. |
+| 0:59–1:11 | **The referee.** Banyan Sapling scores the plain route a violation (45.4%) and Open Patch supported (56.0%). Both are calibrated `unsure`, and we leave that on screen. |
+| 1:11–1:20 | **The patch.** Four pins move; application source doesn't. |
+| 1:20–1:30 | **A real repo, end to end.** Paste PHP-Calculator, Mubit plans it, the verdict shows "7.4 → 8.2, two files" with its Mubit request ID, and the three-line diff applies with `git apply`. Real app screenshots from a live run. |
+| 1:30–1:42 | **The Mubit console.** One frozen task: 660 calls, 44 kept, adapter v1 on Silent test at 33.3% of a 95% target, and the new pin-decision task (404 calls, in review) that is built to train faster. |
+| 1:42–1:52 | **Where it goes next.** PHP is this week's fire; tomorrow it's Node, Python, a leftover OpenSSL, an abandoned npm lock. Same loop: review, migrate, patch, against the rules a team already wrote. |
+| 1:52–1:58 | **End card.** PHP tonight, every pin tomorrow. github.com/Ahamisi/open-patch |
 
 ## How Mubit is used
 
