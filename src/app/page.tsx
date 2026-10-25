@@ -119,8 +119,8 @@ export default function HomePage() {
           </h1>
           <p className="mt-4 text-base leading-7 text-mist-300">
             When the bug is in the interpreter, the base image or the toolchain, rewriting app code
-            doesn't fix it. Paste a repository: Open Patch finds the runtime it actually runs, moves
-            the version pins to a supported release under your team's rules, and hands you a patch
+            doesn&apos;t fix it. Paste a repository: Open Patch finds the runtime it actually runs, moves
+            the version pins to a supported release under your team&apos;s rules, and hands you a patch
             to review. Your application code stays as it is.
           </p>
           <p className="mt-3 font-mono text-xs uppercase tracking-[0.14em] text-mist-500">
