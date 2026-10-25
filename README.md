@@ -165,7 +165,7 @@ Plan 3 asks a 4B adapter to reproduce long free-text plans, and v1 matches about
 | Training | starts at 25 kept; not started |
 | Served by | `gpt-6-luna` |
 
-Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The first-stage console page above is authoritative; nothing in Open Patch is served by either adapter tonight.
+Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority; nothing in Open Patch is served by either adapter tonight.
 
 ## Mubit task design
 
