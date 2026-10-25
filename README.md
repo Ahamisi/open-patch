@@ -19,7 +19,7 @@ A large team doesn't patch one repo. It runs the same migration (an engine CVE, 
 3. **Corrections retrain it.** When a reviewer fixes a plan, the correction goes back to the same task as a new example, and the next version learns the team's own rules.
 4. **The cheap model takes over when it's good enough.** Mubit runs the adapter in silent test, then canary, then promoted. Only once it matches the frontier model on the team's task do later repos stop paying frontier prices for an answer the team has already taught it.
 
-Tonight that loop really ran: over 1,000 calls across three tasks, and Mubit trained the pin-decision adapter overnight to **56.7%** on 30 test cases (plan 3's first adapter: 33.3%). Neither is at the 95% bar yet, so both are still shadowing and luna answers every call. Details under [Adapter status](#adapter-status-console-is-the-authority).
+Tonight that loop really ran, over 1,000 calls across three tasks, and each task got tighter: plan 3's first adapter scored 33.3%, the pin-decision adapter 56.7%, and the **pin-list task's v1 scored 100% on 29 held-out test cases, against an 85% target ("Target met")**. On that task the small Qwen3-4B model with our prompt gives the same answer as the frontier model on every held-out case, so those calls don't need the frontier model at all. It is in silent test now; Mubit moves it to canary once 50 live pairs across 10 sessions are graded. Details under [Adapter status](#adapter-status-console-is-the-authority).
 
 ## Who it's for
 
@@ -92,7 +92,7 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 - **Small, keepable requests.** We send Mubit only the evidence that decides the runtime (Dockerfile, manifests, CI, version files), never application source. That cut requests from up to 330 KB to under 15 KB and plan latency from about 40 s to 12–16 s. Pin-task requests are about 1 KB.
 - **Real traffic as training data.** Each check is one recorded call with its own `metadata.session_id`. Overnight we ran public PHP, Node and Python repos from GitHub search through the tasks (`scripts/fleet.mjs`, `scripts/fleet-pins.mjs`): over 1,000 calls in 24 hours.
 - **Corrections close the loop.** A reviewer's correction is sent back to the same task as a new example. Repair retries, the Fight baseline and held-out evaluation use `x-middleware-store: false`, so they can't pollute training.
-- **What training has produced so far (Qwen3-4B adapters, both on a 10% Silent test, target 95%).** Pin decision v1, trained overnight: **56.7%** on 30 test cases (base model + prompt: 50.0%). Plan 3 v1: 33.3% on 12 (base: 8.3%). Neither has reached 95%, so Mubit keeps them shadowing and `gpt-6-luna` serves every reply. The console's Evaluations tab shows why rows fail (wording of a free-text reason), which is what the pin-list task removes. Details under [Adapter status](#adapter-status-console-is-the-authority) and in [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
+- **What the three tasks scored (Qwen3-4B on Mubit, all in Silent test).** Pin list v1: **100% on 29 test cases, target 85%, "Target met"** (Mubit's v1 here is "prompt only": the base model with the task prompt already matched every case). Pin decision v1: 56.7% on 30 (base 50.0%, target 95%). Plan 3 v1: 33.3% on 12 (base 8.3%, target 95%). `gpt-6-luna` still serves every reply until Mubit promotes a version. Details under [Adapter status](#adapter-status-console-is-the-authority).
 
 ## How it works
 
@@ -195,6 +195,34 @@ Same model size, same night: making the task narrower took the adapter from 33.3
 **Why it still fails rows, from the console's Evaluations tab:** held-out row 2 has the same exposure (`unknown`), the same `detectedVersion` (`null`) and the same empty `changes` as the provider, and fails only because the one-line `reason` is worded differently ("The PHP version is not pinned in the evidence." vs "The available evidence does not pin a PHP version."). So at 04:45 we opened a third, fresh task, **pin list** (`PIN_V2_SYSTEM_PROMPT`, `task: "v2"`): no free text, every affected pin listed in a fixed order, so the provider's answer is fully determined by the evidence. Tested on PHP-Calculator (all three pins), docker-laravel-alpine (one) and symfony/demo (not affected, none). Feed it with `node scripts/fleet-pins.mjs 1000 v2`.
 
 In Try models, the v1 adapter answered a PHP-Calculator pin input in 1.3 s in the task's exact JSON shape with the right exposure, but listed no pins. That is the kind of miss the next version has to fix. It is still below the 95% bar, so Mubit keeps it in silent test and luna answers every call. More traffic on this task is the path to v2. Feed it with `npm run dev` and `node scripts/fleet-pins.mjs 400` (route: `POST /api/fleet/pins`). The Mubit console is the authority.
+
+### Third task: pin list, 100% on 29 test cases (console, 25 Oct, 09:45 London)
+
+| Fact | Value |
+| --- | --- |
+| Task / adapter | `Open Patch's pin-list task` · `ad_lane_97cdec99` · Qwen3-4B-Instruct-2507 v1 |
+| Exam | **100%** of 29 held-out test cases match the provider's recorded answer; **target 85%, "Target met"** |
+| What v1 is | "Prompt only" / "rules only": the base model with the task's prompt. The console reports base model + prompt at 100% too, so no extra weights were needed |
+| Status | Silent test (shadow 10%). Next step, canary: needs 50 graded live pairs across 10 sessions |
+| Served by | `gpt-6-luna` until Mubit promotes it |
+
+Our model next to the frontier model, copied from the console's Evaluations tab (held-out row 1, a repo with two pins to move):
+
+```json
+// Qwen3-4B on Mubit (pin-list v1)
+{"exposure":"affected","detectedVersion":"7.4","changes":[
+  {"file":"src/composer.json","from":"^7.4 || ^8.0","to":">=8.2 <8.4"},
+  {"file":"docker/apache/Dockerfile","from":"php:7.4-apache","to":"php:8.2-apache"}]}
+
+// gpt-6-luna (recorded provider answer)
+{"exposure":"affected","detectedVersion":"7.4","changes":[
+  {"file":"src/composer.json","from":"^7.4 || ^8.0","to":">=8.2 <8.4"},
+  {"file":"docker/apache/Dockerfile","from":"php:7.4-apache","to":"php:8.2-apache"}]}
+```
+
+Row 15 (one Dockerfile, `php:7.4-apache` → `php:8.2-apache`) matches the same way. The other 27 cases are `not_affected` or `unknown` with no changes, and every one matches, including the detected version (`8.0.11`, `5.6`, `7.2`, `3.11`, `15.4.0` and so on). Being straight about the mix: 2 of the 29 cases needed pin changes, so the next exams should hold more `affected` repos.
+
+What took it from 33% to 100% was the task design, not a bigger model. Plan 3 asks for a free-text plan. Pin decision asks for a short JSON with a one-sentence reason, and its failures were that sentence worded differently. Pin list removes the sentence and fixes which pins to list and in what order, so the right answer is fully determined by the evidence, and the small model gets it every time.
 
 ## Mubit task design
 
