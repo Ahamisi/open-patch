@@ -70,11 +70,14 @@ It applies cleanly to the real repo. No `app/*.php` file is touched. If a repo d
 
 ## How Mubit is used
 
-- **One frozen task.** Every plan is a call to one Mubit task, `PatchPilot's advisory-to-migration-plan 3`, through `https://api.mubit.ai/openai/v1` with the same system prompt, model (`gpt-6-luna`) and JSON output format. The prompt is frozen on purpose: changing one word would start a new task and lose the kept examples. Repo evidence, advisory, house rule and reviewer notes all travel in the user message.
-- **Small, keepable requests.** We send Mubit only the evidence that decides the runtime (Dockerfile, manifests, CI, version files), never application source. That cut requests from up to 330 KB to under 15 KB and plan latency from about 40 s to 12–16 s.
-- **Real traffic as training data.** Each check is one recorded call with its own `metadata.session_id`. On 24 Oct we ran 500+ public PHP, Node and Python repos through `POST /api/fleet/check` (`scripts/fleet.mjs`): 660 calls on the task in 7 days.
+- **Three frozen tasks, each a separate Mubit adapter.** Every LLM call goes through `https://api.mubit.ai/openai/v1` with `gpt-6-luna`. A task's system prompt never changes once traffic starts, because one changed word starts a new task; everything that varies (repo evidence, advisory, house rule, reviewer notes) travels in the user message.
+  1. `PatchPilot's advisory-to-migration-plan 3`: the full migration plan the app shows (`PLAN_SYSTEM_PROMPT`).
+  2. `Open Patch's pin-decision task`: just the pin decision as short JSON (`PIN_SYSTEM_PROMPT`), opened 25 Oct 00:55.
+  3. `Open Patch's pin-list task`: the same decision with no free text at all (`PIN_V2_SYSTEM_PROMPT`), opened 25 Oct 04:45.
+- **Small, keepable requests.** We send Mubit only the evidence that decides the runtime (Dockerfile, manifests, CI, version files), never application source. That cut requests from up to 330 KB to under 15 KB and plan latency from about 40 s to 12–16 s. Pin-task requests are about 1 KB.
+- **Real traffic as training data.** Each check is one recorded call with its own `metadata.session_id`. Overnight we ran public PHP, Node and Python repos from GitHub search through the tasks (`scripts/fleet.mjs`, `scripts/fleet-pins.mjs`): over 1,000 calls in 24 hours.
 - **Corrections close the loop.** A reviewer's correction is sent back to the same task as a new example. Repair retries, the Fight baseline and held-out evaluation use `x-middleware-store: false`, so they can't pollute training.
-- **Honest status.** The adapter (Qwen3-4B, v1) scores 33.3% against Mubit's 95% target, with the base model alone at 8.3%. It is on a 10% silent test, not Passed, so every reply is still `gpt-6-luna`. Mubit's daily review limit left most of the new calls unreviewed on 24 Oct. See [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
+- **What training has produced so far (Qwen3-4B adapters, both on a 10% Silent test, target 95%).** Pin decision v1, trained overnight: **56.7%** on 30 test cases (base model + prompt: 50.0%). Plan 3 v1: 33.3% on 12 (base: 8.3%). Neither has reached 95%, so Mubit keeps them shadowing and `gpt-6-luna` serves every reply. The console's Evaluations tab shows why rows fail (wording of a free-text reason), which is what the pin-list task removes. Details under [Adapter status](#adapter-status-console-is-the-authority) and in [`submit/ADAPTER-CEILING-NOTE.md`](submit/ADAPTER-CEILING-NOTE.md).
 
 ## How it works
 
