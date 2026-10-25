@@ -115,12 +115,16 @@ export default function HomePage() {
         <div className="grid-fade pointer-events-none absolute inset-0" />
         <div className="relative max-w-3xl">
           <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight md:text-5xl">
-            Is your PHP runtime the vulnerability?
+            Is your runtime the vulnerability?
           </h1>
           <p className="mt-4 text-base leading-7 text-mist-300">
-            Paste a repository. Open Patch finds the PHP version it actually runs, moves the version
-            pins to a supported release, and hands you a patch to review. Your application code
-            stays as it is.
+            When the bug is in the interpreter, the base image or the toolchain, rewriting app code
+            doesn't fix it. Paste a repository: Open Patch finds the runtime it actually runs, moves
+            the version pins to a supported release under your team's rules, and hands you a patch
+            to review. Your application code stays as it is.
+          </p>
+          <p className="mt-3 font-mono text-xs uppercase tracking-[0.14em] text-mist-500">
+            Patches PHP today (php2shell) · Node, Python, OpenSSL and lockfiles next
           </p>
 
           <form
@@ -192,12 +196,12 @@ export default function HomePage() {
           {
             k: "1",
             t: "Find the real version",
-            d: "We read the pins that decide which PHP runs: Dockerfile, composer.json, CI and .php-version. If they don't say, we tell you we don't know.",
+            d: "We read the pins that decide which runtime ships: Dockerfile base image, manifests, CI and version files. If they don't say, we tell you we don't know.",
           },
           {
             k: "2",
             t: "Plan the upgrade with Mubit",
-            d: "Mubit plans the move under your team's policy (PHP 8.2 by default). A code edit can't fix a vulnerable interpreter, so the plan doesn't pretend it can.",
+            d: "Mubit plans the move under your team's policy (for PHP, 8.2 by default). A code edit can't fix a vulnerable interpreter, so the plan doesn't pretend it can.",
           },
           {
             k: "3",
